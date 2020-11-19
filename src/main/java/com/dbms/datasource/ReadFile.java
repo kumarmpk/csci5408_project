@@ -2,16 +2,12 @@ package com.dbms.datasource;
 
 import com.dbms.presentation.IConsoleOutput;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.util.stream.Collectors;
 
 @Component
 public class ReadFile implements IReadFile{
@@ -20,17 +16,15 @@ public class ReadFile implements IReadFile{
     private IConsoleOutput consoleOutput;
 
     @Autowired
-    private ResourceLoader resourceLoader;
+    private Resource resource;
 
     @Override
     public JSONArray readJSON(String filePath) throws IOException, ParseException {
         JSONParser jsonParser = new JSONParser();
         try{
-            Resource resource = resourceLoader.getResource("classpath:"+filePath);
-            InputStream inputStream = resource.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String file = reader.lines().collect(Collectors.joining("\n"));
-            JSONArray userJsonArray = (JSONArray) jsonParser.parse(file);
+            filePath = resource.dbPath + filePath;
+            FileReader reader = new FileReader(filePath);
+            JSONArray userJsonArray = (JSONArray) jsonParser.parse(reader);
             return userJsonArray;
         } catch (FileNotFoundException e) {
             consoleOutput.printMsgToConsole("ReadFile: readJSON: File not found. " + e);

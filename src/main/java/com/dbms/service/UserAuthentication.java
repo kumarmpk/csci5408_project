@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 @Component
-public class UserLoginRegister {
+public class UserAuthentication {
 
     @Autowired
     private IReadFile readFile;
@@ -71,8 +71,11 @@ public class UserLoginRegister {
 
         List<User> userList = getUserDetails();
         Collections.sort(userList, Collections.reverseOrder());
-        id = userList.get(0).getId() + 1;
-
+        if (userList.size() > 0) {
+            id = userList.get(0).getId() + 1;
+        } else {
+            id = 0;
+        }
         return id;
     }
 

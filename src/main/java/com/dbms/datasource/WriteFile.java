@@ -2,11 +2,11 @@ package com.dbms.datasource;
 
 import com.dbms.presentation.ConsoleOutput;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.file.Paths;
 
 @Component
 public class WriteFile implements IWriteFile{
@@ -15,14 +15,13 @@ public class WriteFile implements IWriteFile{
     private ConsoleOutput consoleOutput;
 
     @Autowired
-    private ResourceLoader resourceLoader;
+    private Resource resource;
 
     public void writeFile(String content, String filePath) throws IOException {
         FileWriter fileWriter = null;
         try {
-            Resource resource = resourceLoader.getResource("classpath:"+filePath);
-            File file = resource.getFile();
-            fileWriter = new FileWriter(file);
+            filePath = resource.dbPath + filePath;
+            fileWriter = new FileWriter(filePath);
             fileWriter.write(content);
         } catch (IOException e){
             consoleOutput.printMsgToConsole("WriteFile: writeFile: IOException: "+e);

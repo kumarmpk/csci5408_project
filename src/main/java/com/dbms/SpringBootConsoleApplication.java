@@ -1,11 +1,16 @@
-package com.data;
+package com.dbms;
 
-import com.data.service.HelloMessageService;
+import com.dbms.models.User;
+import com.dbms.presentation.IReadUserInput;
+import com.dbms.service.HelloMessageService;
+import com.dbms.service.UserLoginRegister;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.util.Date;
 
 import static java.lang.System.exit;
 
@@ -14,6 +19,12 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 
     @Autowired
     private HelloMessageService helloService;
+
+    @Autowired
+    private UserLoginRegister userLoginRegister;
+
+    @Autowired
+    private IReadUserInput readUserInput;
 
     public static void main(String[] args) throws Exception {
 
@@ -28,12 +39,15 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        if (args.length > 0 ) {
-            System.out.println(helloService.getMessage(args[0].toString()));
-        }else{
-            System.out.println(helloService.getMessage());
+        String userName = readUserInput.getStringInput("Please enter the userName to login.");
+        User user = userLoginRegister.checkUser(userName);
+        if(user == null){
+            String password = readUserInput.getStringInput("UserName is new. Please enter the password to register.");
+            userLoginRegister.saveUser(userName, password);
         }
 
-        exit(0);
+
     }
+
+
 }

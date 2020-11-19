@@ -15,7 +15,7 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="com.data" level="error" additivity="false">
+    <logger name="com.dbms" level="error" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 

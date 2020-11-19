@@ -1,0 +1,23 @@
+[
+  {
+    "password":"pass1",
+    "createdDate":"15-Nov-2020",
+    "lastLoggedInDate":"16-Nov-2020",
+    "id":0,
+    "userName":"user1"
+  },
+  {
+    "password":"pass2",
+    "createdDate":"12-Nov-2020",
+    "lastLoggedInDate":"15-Nov-2020",
+    "id":1,
+    "userName":"user2"
+  },
+  {
+    "password":"password3",
+    "createdDate":"18-Nov.-2020",
+    "lastLoggedInDate":"18-Nov.-2020",
+    "id":2,
+    "userName":"user3"
+  }
+]

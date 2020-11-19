@@ -4,14 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 @Component
 public class ReadUserInput implements IReadUserInput {
 
     private Scanner scanner;
 
-    @Autowired
-    private IConsoleOutput consoleOutput;
+    Logger logger = new DBMSLogger(ConsoleOutput.class.getName()).logger;
 
     public ReadUserInput(){
         scanner = new Scanner(System.in);
@@ -19,13 +19,13 @@ public class ReadUserInput implements IReadUserInput {
 
     @Override
     public String getStringInput(String input){
-        consoleOutput.printMsgToConsole(input);
+        logger.info(input);
         return scanner.nextLine();
     }
 
     @Override
     public int getIntInput(String input){
-        consoleOutput.printMsgToConsole(input);
+        logger.info(input);
         return scanner.nextInt();
     }
 

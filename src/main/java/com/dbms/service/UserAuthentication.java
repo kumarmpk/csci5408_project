@@ -1,9 +1,11 @@
 package com.dbms.service;
 
+import com.dbms.DBMSApp;
 import com.dbms.datasource.IReadFile;
 import com.dbms.datasource.IWriteFile;
 import com.dbms.models.User;
 import com.dbms.presentation.ConsoleOutput;
+import com.dbms.presentation.IConsoleOutput;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -27,7 +29,7 @@ public class UserAuthentication {
     private IWriteFile writeFile;
 
     @Autowired
-    private ConsoleOutput consoleOutput;
+    private IConsoleOutput consoleOutput;
 
     public User checkUser(String userName) throws Exception {
 
@@ -97,7 +99,7 @@ public class UserAuthentication {
                 userList.add(user);
             }
         } catch (Exception e){
-            consoleOutput.printMsgToConsole("UserLoginRegister: getUserDetails: Exception: "+e);
+            consoleOutput.info("UserLoginRegister: getUserDetails: Exception: "+e);
             throw e;
         }
 

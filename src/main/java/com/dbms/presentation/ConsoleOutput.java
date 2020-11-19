@@ -1,17 +1,25 @@
 package com.dbms.presentation;
 
 import org.springframework.stereotype.Component;
+import java.util.logging.Logger;
 
 @Component
 public class ConsoleOutput implements IConsoleOutput{
 
-    private void printMsg(String input){
-        System.out.println(input);
+    Logger logger = new DBMSLogger(ConsoleOutput.class.getName()).logger;
+
+    @Override
+    public void info(String text) {
+        logger.info(text);
     }
 
     @Override
-    public void printMsgToConsole(String input){
-        printMsg(input);
+    public void warning(String text) {
+        logger.warning(text);
     }
 
+    @Override
+    public void error(String text) {
+        logger.severe(text);
+    }
 }

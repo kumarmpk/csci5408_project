@@ -1,8 +1,10 @@
 package com.dbms;
 
 import com.dbms.models.User;
+import com.dbms.presentation.ConsoleOutput;
 import com.dbms.presentation.IConsoleOutput;
 import com.dbms.presentation.IReadUserInput;
+import com.dbms.presentation.ReadUserInput;
 import com.dbms.service.HelloMessageService;
 import com.dbms.service.UserAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +51,13 @@ public class DBMSApp implements CommandLineRunner {
                 if (isValidInput(userName)) {
                     user = userAuth.checkUser(userName);
                 } else {
-                    consoleOutput.printMsgToConsole("Invalid username");
+                    consoleOutput.warning("Invalid username");
                 }
             }
 
             if(user == null){
                 isNewUser = true;
-                consoleOutput.printMsgToConsole("User name entered is new. Please enter a password to register.");
+                consoleOutput.info("User name entered is new. Please enter a password to register.");
             }
 
             while(!isValidInput(password)) {
@@ -66,11 +68,11 @@ public class DBMSApp implements CommandLineRunner {
                     }
                     isUserLoggedIn = true;
                 } else {
-                    consoleOutput.printMsgToConsole("Invalid password");
+                    consoleOutput.warning("Invalid password");
                 }
             }
         }
-        consoleOutput.printMsgToConsole("Logged in successfully");
+        consoleOutput.info("Logged in successfully -- write new logic here");
     }
 
     private boolean isValidInput(String input) {

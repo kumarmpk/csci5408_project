@@ -1,18 +1,18 @@
 package com.dbms.datasource;
 
+import com.dbms.DBMSApp;
 import com.dbms.presentation.ConsoleOutput;
+import com.dbms.presentation.IConsoleOutput;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.nio.file.Paths;
 
 @Component
 public class WriteFile implements IWriteFile{
 
     @Autowired
-    private ConsoleOutput consoleOutput;
+    private IConsoleOutput consoleOutput;
 
     @Autowired
     private Resource resource;
@@ -24,7 +24,7 @@ public class WriteFile implements IWriteFile{
             fileWriter = new FileWriter(filePath);
             fileWriter.write(content);
         } catch (IOException e){
-            consoleOutput.printMsgToConsole("WriteFile: writeFile: IOException: "+e);
+            consoleOutput.error("WriteFile: writeFile: IOException: "+e);
             throw e;
         } finally {
             if(fileWriter != null) {

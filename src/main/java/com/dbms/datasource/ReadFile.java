@@ -1,5 +1,7 @@
 package com.dbms.datasource;
 
+import com.dbms.DBMSApp;
+import com.dbms.presentation.ConsoleOutput;
 import com.dbms.presentation.IConsoleOutput;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -27,13 +29,13 @@ public class ReadFile implements IReadFile{
             JSONArray userJsonArray = (JSONArray) jsonParser.parse(reader);
             return userJsonArray;
         } catch (FileNotFoundException e) {
-            consoleOutput.printMsgToConsole("ReadFile: readJSON: File not found. " + e);
+            consoleOutput.error("ReadFile: readJSON: File not found. " + e);
             throw e;
         } catch (IOException e) {
-            consoleOutput.printMsgToConsole("ReadFile: readJSON: File read failed. " + e);
+            consoleOutput.error("ReadFile: readJSON: File read failed. " + e);
             throw e;
         } catch (ParseException e) {
-            consoleOutput.printMsgToConsole("ReadFile: readJSON: Imported file is not valid. Please make sure it is JSON format or if all fields are either boolean,string,array,object");
+            consoleOutput.error("ReadFile: readJSON: Imported file is not valid. Please make sure it is JSON format or if all fields are either boolean,string,array,object");
             throw e;
         }
     }

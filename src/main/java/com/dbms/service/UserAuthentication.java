@@ -1,11 +1,14 @@
 package com.dbms.service;
 
 import com.dbms.DBMSApp;
+import com.dbms.common.Validation;
 import com.dbms.datasource.IReadFile;
 import com.dbms.datasource.IWriteFile;
+import com.dbms.datasource.Resource;
 import com.dbms.models.User;
 import com.dbms.presentation.ConsoleOutput;
 import com.dbms.presentation.IConsoleOutput;
+import com.dbms.presentation.IReadUserInput;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -31,6 +34,63 @@ public class UserAuthentication {
     @Autowired
     private IConsoleOutput consoleOutput;
 
+    @Autowired
+    private IReadUserInput readUserInput;
+
+    @Autowired
+    private Validation validation;
+
+    @Autowired
+    private Resource resource;
+
+    public User userRegisterLogin() throws Exception {
+        String userName = null;
+        String password = null;
+        User user = null;
+        boolean isNewUser = false;
+        boolean invalidUserResponse = true;
+
+        while (invalidUserResponse) {
+            userName = readUserInput.getStringInput("Enter username:");
+            if (validation.isValidInput(userName)) {
+                user = checkUser(userName);
+                invalidUserResponse = false;
+            } else {
+                invalidUserResponse = true;
+                consoleOutput.warning("Invalid username");
+            }
+        }
+
+        if(user == null){
+            isNewUser = true;
+            consoleOutput.info("User name entered is new. Please enter a password to register.");
+        } else{
+            isNewUser = false;
+            while(!validation.isValidInput(password) || !password.equalsIgnoreCase(user.getPassword())){
+                password = readUserInput.getStringInput("Enter password:");
+                if (!validation.isValidInput(password) || !password.equalsIgnoreCase(user.getPassword())) {
+                    consoleOutput.warning("Invalid password. Please try again.");
+                }
+            }
+        }
+
+        if(isNewUser) {
+            invalidUserResponse = true;
+            while (invalidUserResponse) {
+                if (!validation.isValidInput(password)) {
+                    password = readUserInput.getStringInput("Enter password:");
+                    invalidUserResponse = false;
+                } else {
+                    consoleOutput.warning("Invalid password");
+                    invalidUserResponse = true;
+                }
+            }
+            user = saveUser(userName, password);
+        }
+        consoleOutput.info("Logged in successfully -- write new logic here");
+        return user;
+    }
+
     public User checkUser(String userName) throws Exception {
 
         List<User> userList = getUserDetails();
@@ -43,7 +103,7 @@ public class UserAuthentication {
         return null;
     }
 
-    public void saveUser(String userName, String password) throws Exception {
+    public User saveUser(String userName, String password) throws Exception {
         User user = new User();
         user.setUserName(userName);
         user.setPassword(password);
@@ -51,6 +111,7 @@ public class UserAuthentication {
         user.setLastLoggedInDate(new Date());
         user.setId(getLatestId());
         saveUserToFile(user);
+        return user;
     }
 
     public void saveUserToFile(User user) throws IOException, ParseException {
@@ -107,7 +168,7 @@ public class UserAuthentication {
     }
 
     public JSONArray getUserFile() throws IOException, ParseException {
-        return readFile.readJSON("user.json");
+        return readFile.readJSON(resource.dbPath+"user.json");
     }
 
 

@@ -6,5 +6,5 @@ import java.nio.file.Paths;
 
 @Component
 public final class Resource {
-    final String dbPath = Paths.get("").toAbsolutePath().toString() + "\\data\\";
+    public final String dbPath = Paths.get("").toAbsolutePath().toString() + "\\data\\";
 }

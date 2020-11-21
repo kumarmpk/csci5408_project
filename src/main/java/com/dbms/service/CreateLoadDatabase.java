@@ -8,7 +8,6 @@ import com.dbms.models.User;
 import com.dbms.presentation.ConsoleOutput;
 import com.dbms.presentation.ReadUserInput;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -37,26 +37,28 @@ public class CreateLoadDatabase {
     @Autowired
     private Resource resource;
 
-    public void createLoadDatabase(User user) throws Exception {
+    public Map<String, JSONArray> createLoadDatabase(User user) throws Exception {
+        Map<String, JSONArray> tableRecords = null;
         String userResponse;
         boolean invalidUserResponse = true;
         while(invalidUserResponse) {
             userResponse = readUserInput
                     .getStringInput("Enter C to create new database or L to load the existing database.");
             if (validation.isValidInput(userResponse) && userResponse.equalsIgnoreCase(Constants.C)) {
-                createDatabase(user.getUserName());
+                tableRecords = createDatabase(user.getUserName());
                 invalidUserResponse = false;
             } else if (validation.isValidInput(userResponse) && userResponse.equalsIgnoreCase(Constants.L)) {
-                loadDatabase(user.getUserName());
+                tableRecords = loadDatabase(user.getUserName());
                 invalidUserResponse = false;
             } else {
                 consoleOutput.warning("Invalid response. Please try again.");
                 invalidUserResponse = true;
             }
         }
+        return tableRecords;
     }
 
-    private void createDatabase(String userName) throws IOException {
+    private Map<String, JSONArray> createDatabase(String userName) throws IOException {
         String userResponse = readUserInput
                 .getStringInput("Enter the database name to create. Note: Name can have only alphanumeric characters.");
         boolean invalidUserResponse = true;
@@ -76,6 +78,7 @@ public class CreateLoadDatabase {
                 invalidUserResponse = true;
             }
         }
+        return new HashMap<>();
     }
 
     private void createDirectory(String dbName, String userName) throws IOException {
@@ -97,30 +100,24 @@ public class CreateLoadDatabase {
         return isExist;
     }
 
-    private void loadDatabase(String userName) throws Exception {
+    private Map<String, JSONArray> loadDatabase(String userName) throws Exception {
+        Map<String, JSONArray> tableRecords = null;
         boolean invalidResponse = true;
         while(invalidResponse) {
             String dbName = readUserInput.getStringInput("Enter the database to load.");
             if (validation.isValidInput(dbName) && checkDBNameUserName(dbName, userName)) {
-                loadTables(dbName, userName);
+                tableRecords = loadTables(dbName, userName);
                 invalidResponse = false;
             } else {
                 consoleOutput.warning("The database does not exist. Kindly provide existing database name.");
                 invalidResponse = true;
             }
         }
+        return tableRecords;
     }
 
-    private void loadTables(String dbName, String userName) throws Exception {
-        Map<String, JSONArray> tables = readFile.readFilesFromPath(userName+"_"+dbName);
-        for(String tableName : tables.keySet()){
-            System.out.println(tableName);
-            JSONArray data = tables.get(tableName);
-            for(Object obj : data){
-                JSONObject jsonObject = (JSONObject) obj;
-                System.out.println(jsonObject);
-            }
-        }
+    private Map<String, JSONArray> loadTables(String dbName, String userName) throws Exception {
+        return readFile.readFilesFromPath(userName+"_"+dbName);
     }
 
 

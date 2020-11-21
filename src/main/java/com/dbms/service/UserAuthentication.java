@@ -5,6 +5,7 @@ import com.dbms.common.Validation;
 import com.dbms.datasource.IReadFile;
 import com.dbms.datasource.IWriteFile;
 import com.dbms.datasource.Resource;
+import com.dbms.models.CompleteDatabase;
 import com.dbms.models.User;
 import com.dbms.presentation.ConsoleOutput;
 import com.dbms.presentation.IConsoleOutput;
@@ -87,7 +88,7 @@ public class UserAuthentication {
             }
             user = saveUser(userName, password);
         }
-        consoleOutput.info("Logged in successfully -- write new logic here");
+        consoleOutput.info("Logged in successfully.");
         return user;
     }
 

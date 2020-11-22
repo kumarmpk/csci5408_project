@@ -22,4 +22,9 @@ public class ConsoleOutput implements IConsoleOutput{
     public void error(String text) {
         logger.severe(text);
     }
+
+    @Override
+    public void print(String text) {
+        System.out.println(text);
+    }
 }

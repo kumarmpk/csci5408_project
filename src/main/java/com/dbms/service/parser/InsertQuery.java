@@ -10,8 +10,8 @@ public class InsertQuery {
     private static final String errorMessage = "Invalid insert query. Please check syntax/spacing.";
     private static final String tableNameRegex = "(\\w+)";
     private static final String columnHeadingRegex = "(\\((?:\\w+)(?:,\\s?\\w+)*\\))?";
-    private static final String valueTypes = "(?:\".*\")|(?:\\d+.?\\d+)|(?:'.')|TRUE|true|FALSE|false";
-    private static final String columnValuesRegex = "(\\((?:.*)*\\))";
+    private static final String valueTypes = "(?:\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
+    private static final String columnValuesRegex = "(\\((?:" + valueTypes + ")(?:,\\s?" + valueTypes + ")*\\))";
     private static final String insertRegex = "INSERT INTO " +
             tableNameRegex +
             "\\s" +
@@ -57,12 +57,12 @@ public class InsertQuery {
             String tableName = (String) parsedQuery.get("tableName");
             JSONArray columns = (JSONArray) parsedQuery.get("columns");
             JSONArray values = (JSONArray) parsedQuery.get("values");
-            if (tableName.isEmpty() || columns.isEmpty() || values.isEmpty() || columns.size() != values.size()) {
+            if (tableName.isEmpty()) {
                 System.out.println(errorMessage);
                 return false;
             }
             System.out.println(parsedQuery);
-            // get column types and map values and insert
+            // get data
             return true;
         } catch (Exception e) {
             System.out.println(e.getLocalizedMessage());
@@ -72,7 +72,7 @@ public class InsertQuery {
 
     private static JSONArray getColumnArray(String columnNames) {
         JSONArray columns = new JSONArray();
-        if(columnNames.isEmpty()) {
+        if(columnNames == null || columnNames.isEmpty()) {
             return columns;
         }
         columnNames = columnNames.substring(1, columnNames.length() - 1); // to remove ( )
@@ -80,9 +80,10 @@ public class InsertQuery {
         Collections.addAll(columns, tempArray);
         return columns;
     }
+
     private static JSONArray getValuesArray(String columnValues){
         JSONArray values = new JSONArray();
-        if(columnValues.isEmpty()) {
+        if(columnValues == null || columnValues.isEmpty()) {
             return values;
         }
         int currIndex = 1; // to avoid open bracket "("
@@ -114,6 +115,9 @@ public class InsertQuery {
     }
 
     public static void main(String []a) {
-        runQuery("INSERT INTO hello_world (col1,col2,col3,col4) VALUES (\"ku78*&\",12.3, 12, false);");
+        String s1 = "INSERT INTO hello_world (col1,col2,col3,col4) VALUES (\"ku78*&\",12.3, 12, false);";
+        String s2 = "INSERT INTO hello_world VALUES (\"ku78*&\",12.3, 12, false);";
+        runQuery(s1);
+        runQuery(s2);
     }
 }

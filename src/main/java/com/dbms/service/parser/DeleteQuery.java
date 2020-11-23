@@ -4,62 +4,54 @@ import org.json.simple.JSONObject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class UpdateQuery {
+public class DeleteQuery {
 
-    private static final String errorMessage = "Invalid update query. Please check syntax/spacing.";
+    private static final String errorMessage = "Invalid delete query. Please check syntax/spacing.";
     private static final String tableNameRegex = "(\\w+)";
-    private static final String valueTypes = "(?:\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
-    // no spaces allowed for updations
-    private static final String assignmentRegex = "((?:\\w+=" + valueTypes + ")(?:,\\w+=" + valueTypes + ")*)";
+    private static final String valueTypes = "(?:\".*\"|\\d+(?:\\.\\d+)?|TRUE|true|FALSE|false)";
     private static final String conditionRegex = "(?:(?:\\sWHERE\\s)(\\w+=" + valueTypes + "))?";
-    private static final String updateRegex = "UPDATE " +
+    private static final String deleteRegex = "DELETE FROM\\s" +
             tableNameRegex +
-            "\\sSET\\s" +
-            assignmentRegex +
             conditionRegex +
             ";?$";
 
-    public static void runQuery(String updateQuery) {
-        JSONObject parsedQuery = parseUpdateQuery(updateQuery);
-        executeUpdateQuery(parsedQuery);
+    public static void runQuery(String deleteQuery) {
+        JSONObject parsedQuery = parseDeleteQuery(deleteQuery);
+        executeDeleteQuery(parsedQuery);
     }
 
-    public static JSONObject parseUpdateQuery(String updateQuery) {
-        JSONObject insertObject = new JSONObject();
+    public static JSONObject parseDeleteQuery(String deleteQuery) {
+        JSONObject selectObject = new JSONObject();
         try {
-            Pattern syntaxExp = Pattern.compile(updateRegex, Pattern.CASE_INSENSITIVE);
-            Matcher queryParts = syntaxExp.matcher(updateQuery);
+            Pattern syntaxExp = Pattern.compile(deleteRegex, Pattern.CASE_INSENSITIVE);
+            Matcher queryParts = syntaxExp.matcher(deleteQuery);
             String tableName = null;
-            String assignments = null;
             String condition = null;
             if(queryParts.find()) {
                 tableName = queryParts.group(1);
-                assignments = queryParts.group(2);
-                condition = queryParts.group(3);
+                condition = queryParts.group(2);
             } else {
                 System.out.println(errorMessage);
             }
-            insertObject.put("tableName", tableName);
-            insertObject.put("assignments", getMappings(assignments));
-            insertObject.put("condition", getMappings(condition));
-            return insertObject;
+            selectObject.put("tableName", tableName);
+            selectObject.put("condition", getMappings(condition));
+            return selectObject;
         } catch(Exception e) {
             System.out.println(e.getLocalizedMessage());
             return null;
         }
     }
 
-    public static boolean executeUpdateQuery(JSONObject parsedQuery) {
+    public static boolean executeDeleteQuery(JSONObject parsedQuery) {
         try {
             String tableName = (String) parsedQuery.get("tableName");
-            JSONObject assignments = (JSONObject) parsedQuery.get("assignments");
             JSONObject condition = (JSONObject) parsedQuery.get("condition");
-            if (tableName.isEmpty() || assignments.isEmpty()) {
+            if (tableName.isEmpty()) {
                 System.out.println(errorMessage);
                 return false;
             }
             System.out.println(parsedQuery);
-            // get column types and data and update
+            // get data and delete
             return true;
         } catch (Exception e) {
             System.out.println(e.getLocalizedMessage());
@@ -105,8 +97,8 @@ public class UpdateQuery {
     }
 
     public static void main(String []a) {
-        String s1 = "UPDATE tab1 SET col1=12.2,col2=\"done\",col3=false,col4=TRUE WHERE col5=12.6;";
-        String s2 = "UPDATE tab1 SET col1=12.2,col2=\"done\",col3=false,col4=TRUE;";
+        String s1 = "DELETE FROM table1 WHERE col1=\"12.3\";";
+        String s2 = "DELETE FROM table1";
         runQuery(s1);
         runQuery(s2);
     }

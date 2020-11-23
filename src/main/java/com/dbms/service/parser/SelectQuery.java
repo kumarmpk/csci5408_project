@@ -1,70 +1,86 @@
 package com.dbms.service.parser;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class UpdateQuery {
+public class SelectQuery {
 
-    private static final String errorMessage = "Invalid update query. Please check syntax/spacing.";
+    private static final String errorMessage = "Invalid select query. Please check syntax/spacing.";
     private static final String tableNameRegex = "(\\w+)";
-    private static final String valueTypes = "(?:\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
-    // no spaces allowed for updations
-    private static final String assignmentRegex = "((?:\\w+=" + valueTypes + ")(?:,\\w+=" + valueTypes + ")*)";
+    private static final String columnNameRegex = "((?:\\*)|(?:(?:\\w+)(?:,\\s?\\w+)*))";
+    private static final String valueTypes = "(?:\".*\"|\\d+(?:\\.\\d+)?|TRUE|true|FALSE|false)";
     private static final String conditionRegex = "(?:(?:\\sWHERE\\s)(\\w+=" + valueTypes + "))?";
-    private static final String updateRegex = "UPDATE " +
+    private static final String selectRegex = "SELECT\\s" +
+            columnNameRegex +
+            "\\sFROM\\s" +
             tableNameRegex +
-            "\\sSET\\s" +
-            assignmentRegex +
             conditionRegex +
             ";?$";
 
-    public static void runQuery(String updateQuery) {
-        JSONObject parsedQuery = parseUpdateQuery(updateQuery);
-        executeUpdateQuery(parsedQuery);
+    public static void runQuery(String selectQuery) {
+        JSONObject parsedQuery = parseSelectQuery(selectQuery);
+        executeSelectQuery(parsedQuery);
     }
 
-    public static JSONObject parseUpdateQuery(String updateQuery) {
-        JSONObject insertObject = new JSONObject();
+    public static JSONObject parseSelectQuery(String selectQuery) {
+        JSONObject selectObject = new JSONObject();
         try {
-            Pattern syntaxExp = Pattern.compile(updateRegex, Pattern.CASE_INSENSITIVE);
-            Matcher queryParts = syntaxExp.matcher(updateQuery);
+            Pattern syntaxExp = Pattern.compile(selectRegex, Pattern.CASE_INSENSITIVE);
+            Matcher queryParts = syntaxExp.matcher(selectQuery);
             String tableName = null;
-            String assignments = null;
+            String columnNames = null;
             String condition = null;
             if(queryParts.find()) {
-                tableName = queryParts.group(1);
-                assignments = queryParts.group(2);
+                columnNames = queryParts.group(1);
+                tableName = queryParts.group(2);
                 condition = queryParts.group(3);
             } else {
                 System.out.println(errorMessage);
             }
-            insertObject.put("tableName", tableName);
-            insertObject.put("assignments", getMappings(assignments));
-            insertObject.put("condition", getMappings(condition));
-            return insertObject;
+            selectObject.put("tableName", tableName);
+            selectObject.put("columns", getColumnArray(columnNames));
+            selectObject.put("condition", getMappings(condition));
+            return selectObject;
         } catch(Exception e) {
             System.out.println(e.getLocalizedMessage());
             return null;
         }
     }
 
-    public static boolean executeUpdateQuery(JSONObject parsedQuery) {
+    public static boolean executeSelectQuery(JSONObject parsedQuery) {
         try {
             String tableName = (String) parsedQuery.get("tableName");
-            JSONObject assignments = (JSONObject) parsedQuery.get("assignments");
+            JSONArray columns = (JSONArray) parsedQuery.get("columns");
             JSONObject condition = (JSONObject) parsedQuery.get("condition");
-            if (tableName.isEmpty() || assignments.isEmpty()) {
+            if (tableName.isEmpty() || columns.isEmpty()) {
                 System.out.println(errorMessage);
                 return false;
             }
             System.out.println(parsedQuery);
-            // get column types and data and update
+            // get column types and map values and insert
             return true;
         } catch (Exception e) {
             System.out.println(e.getLocalizedMessage());
             return false;
         }
+    }
+
+    private static JSONArray getColumnArray(String columnNames) {
+        JSONArray columns = new JSONArray();
+        if(columnNames == null || columnNames.isEmpty()) {
+            return columns;
+        }
+        if (columnNames.equals("*")) {
+            columns.add(columnNames);
+        } else {
+            columnNames = columnNames.substring(0, columnNames.length());
+            String[] tempArray = columnNames.split(",");
+            Collections.addAll(columns, tempArray);
+        }
+        return columns;
     }
 
     private static JSONObject getMappings(String assignments) {
@@ -105,9 +121,13 @@ public class UpdateQuery {
     }
 
     public static void main(String []a) {
-        String s1 = "UPDATE tab1 SET col1=12.2,col2=\"done\",col3=false,col4=TRUE WHERE col5=12.6;";
-        String s2 = "UPDATE tab1 SET col1=12.2,col2=\"done\",col3=false,col4=TRUE;";
+        String s1 = "SELECT col1,col2 FROM table1 WHERE col1=\"12.3\";";
+        String s2 = "SELECT col1,col2 FROM table1;";
+        String s3 = "SELECT * FROM table1 WHERE col1=\"12.3\";";
+        String s4 = "SELECT * FROM table1";
         runQuery(s1);
         runQuery(s2);
+        runQuery(s3);
+        runQuery(s4);
     }
 }

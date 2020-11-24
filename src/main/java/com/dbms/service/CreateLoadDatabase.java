@@ -36,7 +36,8 @@ public class CreateLoadDatabase {
 
     @Autowired
     private Resource resource;
-
+    String dbname;
+    String datapath;
     public Map<String, JSONArray> createLoadDatabase(User user) throws Exception {
         Map<String, JSONArray> tableRecords = null;
         String userResponse;
@@ -46,9 +47,13 @@ public class CreateLoadDatabase {
                     .getStringInput("Enter C to create new database or L to load the existing database.");
             if (validation.isValidInput(userResponse) && userResponse.equalsIgnoreCase(Constants.C)) {
                 tableRecords = createDatabase(user.getUserName());
+                CreateTable t=new CreateTable();
+                t.createTableForUser(user, readUserInput, validation, dbname ,user.getUserName(), datapath, consoleOutput);
                 invalidUserResponse = false;
             } else if (validation.isValidInput(userResponse) && userResponse.equalsIgnoreCase(Constants.L)) {
                 tableRecords = loadDatabase(user.getUserName());
+                CreateTable t=new CreateTable();
+                t.createTableForUser(user, readUserInput, validation, dbname ,user.getUserName(), datapath, consoleOutput);
                 invalidUserResponse = false;
             } else {
                 consoleOutput.warning("Invalid response. Please try again.");
@@ -72,6 +77,7 @@ public class CreateLoadDatabase {
                 }
 
                 createDirectory(userResponse, userName);
+                dbname=userResponse;
                 invalidUserResponse = false;
             } else{
                 consoleOutput.warning("Invalid database name. Please try again.");
@@ -85,6 +91,7 @@ public class CreateLoadDatabase {
         try {
             Path path = Paths.get(resource.dbPath + userName + "_" + dbName);
             Files.createDirectory(path);
+            datapath=resource.dbPath;
         } catch (IOException e){
             consoleOutput.error("IOException in createDirectory: "+e);
             throw e;
@@ -96,6 +103,7 @@ public class CreateLoadDatabase {
         File file = new File(resource.dbPath + userName + "_" + dbName);
         if(file.exists() && file.isDirectory()){
             isExist = true;
+            datapath=resource.dbPath;
         }
         return isExist;
     }
@@ -107,6 +115,7 @@ public class CreateLoadDatabase {
             String dbName = readUserInput.getStringInput("Enter the database to load.");
             if (validation.isValidInput(dbName) && checkDBNameUserName(dbName, userName)) {
                 tableRecords = loadTables(dbName, userName);
+                dbname=dbName;
                 invalidResponse = false;
             } else {
                 consoleOutput.warning("The database does not exist. Kindly provide existing database name.");

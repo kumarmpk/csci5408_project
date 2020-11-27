@@ -9,21 +9,21 @@ import java.util.regex.Pattern;
 @Component
 public class DeleteQuery {
 
-    private static final String errorMessage = "Invalid delete query. Please check syntax/spacing.";
-    private static final String tableNameRegex = "(\\w+)";
-    private static final String valueTypes = "(?:\".*\"|\\d+(?:\\.\\d+)?|TRUE|true|FALSE|false)";
-    private static final String conditionRegex = "(?:(?:\\sWHERE\\s)(\\w+=" + valueTypes + "))?";
-    private static final String deleteRegex = "DELETE FROM\\s" +
+    private final String errorMessage = "Invalid delete query. Please check syntax/spacing.";
+    private final String tableNameRegex = "(\\w+)";
+    private final String valueTypes = "(?:\".*\"|\\d+(?:\\.\\d+)?|TRUE|true|FALSE|false)";
+    private final String conditionRegex = "(?:(?:\\sWHERE\\s)(\\w+=" + valueTypes + "))?";
+    private final String deleteRegex = "DELETE FROM\\s" +
             tableNameRegex +
             conditionRegex +
             ";?$";
 
-    public static void runQuery(String deleteQuery) {
+    public void runQuery(String deleteQuery) {
         JSONObject parsedQuery = parseDeleteQuery(deleteQuery);
         executeDeleteQuery(parsedQuery);
     }
 
-    public static JSONObject parseDeleteQuery(String deleteQuery) {
+    public JSONObject parseDeleteQuery(String deleteQuery) {
         JSONObject selectObject = new JSONObject();
         try {
             Pattern syntaxExp = Pattern.compile(deleteRegex, Pattern.CASE_INSENSITIVE);
@@ -45,7 +45,7 @@ public class DeleteQuery {
         }
     }
 
-    public static boolean executeDeleteQuery(JSONObject parsedQuery) {
+    public boolean executeDeleteQuery(JSONObject parsedQuery) {
         try {
             String tableName = (String) parsedQuery.get("tableName");
             JSONObject condition = (JSONObject) parsedQuery.get("condition");
@@ -62,7 +62,7 @@ public class DeleteQuery {
         }
     }
 
-    private static JSONObject getMappings(String assignments) {
+    private JSONObject getMappings(String assignments) {
         try {
             JSONObject assignmentMapping = new JSONObject();
             if(assignments == null || assignments.isEmpty()) {
@@ -99,10 +99,4 @@ public class DeleteQuery {
         }
     }
 
-    public static void main(String []a) {
-        String s1 = "DELETE FROM table1 WHERE col1=\"12.3\";";
-        String s2 = "DELETE FROM table1";
-        runQuery(s1);
-        runQuery(s2);
-    }
 }

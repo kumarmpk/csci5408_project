@@ -9,25 +9,25 @@ import java.util.regex.Pattern;
 @Component
 public class UpdateQuery {
 
-    private static final String errorMessage = "Invalid update query. Please check syntax/spacing.";
-    private static final String tableNameRegex = "(\\w+)";
-    private static final String valueTypes = "(?:\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
+    private final String errorMessage = "Invalid update query. Please check syntax/spacing.";
+    private final String tableNameRegex = "(\\w+)";
+    private final String valueTypes = "(?:\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
     // no spaces allowed for updations
-    private static final String assignmentRegex = "((?:\\w+=" + valueTypes + ")(?:,\\w+=" + valueTypes + ")*)";
-    private static final String conditionRegex = "(?:(?:\\sWHERE\\s)(\\w+=" + valueTypes + "))?";
-    private static final String updateRegex = "UPDATE " +
+    private final String assignmentRegex = "((?:\\w+=" + valueTypes + ")(?:,\\w+=" + valueTypes + ")*)";
+    private final String conditionRegex = "(?:(?:\\sWHERE\\s)(\\w+=" + valueTypes + "))?";
+    private final String updateRegex = "UPDATE " +
             tableNameRegex +
             "\\sSET\\s" +
             assignmentRegex +
             conditionRegex +
             ";?$";
 
-    public static void runQuery(String updateQuery) {
+    public void runQuery(String updateQuery) {
         JSONObject parsedQuery = parseUpdateQuery(updateQuery);
         executeUpdateQuery(parsedQuery);
     }
 
-    public static JSONObject parseUpdateQuery(String updateQuery) {
+    public JSONObject parseUpdateQuery(String updateQuery) {
         JSONObject insertObject = new JSONObject();
         try {
             Pattern syntaxExp = Pattern.compile(updateRegex, Pattern.CASE_INSENSITIVE);
@@ -52,7 +52,7 @@ public class UpdateQuery {
         }
     }
 
-    public static boolean executeUpdateQuery(JSONObject parsedQuery) {
+    public boolean executeUpdateQuery(JSONObject parsedQuery) {
         try {
             String tableName = (String) parsedQuery.get("tableName");
             JSONObject assignments = (JSONObject) parsedQuery.get("assignments");
@@ -70,7 +70,7 @@ public class UpdateQuery {
         }
     }
 
-    private static JSONObject getMappings(String assignments) {
+    private JSONObject getMappings(String assignments) {
         try {
             JSONObject assignmentMapping = new JSONObject();
             if(assignments == null || assignments.isEmpty()) {
@@ -107,10 +107,4 @@ public class UpdateQuery {
         }
     }
 
-    public static void main(String []a) {
-        String s1 = "UPDATE tab1 SET col1=12.2,col2=\"done\",col3=false,col4=TRUE WHERE col5=12.6;";
-        String s2 = "UPDATE tab1 SET col1=12.2,col2=\"done\",col3=false,col4=TRUE;";
-        runQuery(s1);
-        runQuery(s2);
-    }
 }

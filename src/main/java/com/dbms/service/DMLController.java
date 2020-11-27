@@ -41,7 +41,17 @@ public class DMLController {
             String qyeryType = words[0];
             switch (qyeryType) {
                 case insert:
-
+                    insertQuery.runQuery(query);
+                    break;
+                case select:
+                    selectQuery.runQuery(query);
+                    break;
+                case delete:
+                    deleteQuery.runQuery(query);
+                    break;
+                case update:
+                    updateQuery.runQuery(query);
+                    break;
             }
         }
     }

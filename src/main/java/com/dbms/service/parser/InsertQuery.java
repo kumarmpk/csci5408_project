@@ -7,12 +7,12 @@ import java.util.regex.*;
 
 public class InsertQuery {
 
-    private static final String errorMessage = "Invalid insert query. Please check syntax/spacing.";
-    private static final String tableNameRegex = "(\\w+)";
-    private static final String columnHeadingRegex = "(\\((?:\\w+)(?:,\\s?\\w+)*\\))?";
-    private static final String valueTypes = "(?:\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
-    private static final String columnValuesRegex = "(\\((?:" + valueTypes + ")(?:,\\s?" + valueTypes + ")*\\))";
-    private static final String insertRegex = "INSERT INTO " +
+    private final String errorMessage = "Invalid insert query. Please check syntax/spacing.";
+    private final String tableNameRegex = "(\\w+)";
+    private final String columnHeadingRegex = "(\\((?:\\w+)(?:,\\s?\\w+)*\\))?";
+    private final String valueTypes = "(?:\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
+    private final String columnValuesRegex = "(\\((?:" + valueTypes + ")(?:,\\s?" + valueTypes + ")*\\))";
+    private final String insertRegex = "INSERT INTO " +
             tableNameRegex +
             "\\s" +
             columnHeadingRegex +
@@ -22,12 +22,12 @@ public class InsertQuery {
             columnValuesRegex +
             ";?$";
 
-    public static void runQuery(String insertQuery) {
+    public void runQuery(String insertQuery) {
         JSONObject parsedQuery = parseInsertQuery(insertQuery);
         executeInsertQuery(parsedQuery);
     }
 
-    public static JSONObject parseInsertQuery(String insertQuery) {
+    public JSONObject parseInsertQuery(String insertQuery) {
         JSONObject insertObject = new JSONObject();
         try {
             Pattern syntaxExp = Pattern.compile(insertRegex, Pattern.CASE_INSENSITIVE);
@@ -52,7 +52,7 @@ public class InsertQuery {
         }
     }
 
-    public static boolean executeInsertQuery(JSONObject parsedQuery) {
+    public boolean executeInsertQuery(JSONObject parsedQuery) {
         try {
             String tableName = (String) parsedQuery.get("tableName");
             JSONArray columns = (JSONArray) parsedQuery.get("columns");
@@ -70,7 +70,7 @@ public class InsertQuery {
         }
     }
 
-    private static JSONArray getColumnArray(String columnNames) {
+    private JSONArray getColumnArray(String columnNames) {
         JSONArray columns = new JSONArray();
         if(columnNames == null || columnNames.isEmpty()) {
             return columns;
@@ -81,7 +81,7 @@ public class InsertQuery {
         return columns;
     }
 
-    private static JSONArray getValuesArray(String columnValues){
+    private JSONArray getValuesArray(String columnValues){
         JSONArray values = new JSONArray();
         if(columnValues == null || columnValues.isEmpty()) {
             return values;
@@ -114,10 +114,4 @@ public class InsertQuery {
         return values;
     }
 
-    public static void main(String []a) {
-        String s1 = "INSERT INTO hello_world (col1,col2,col3,col4) VALUES (\"ku78*&\",12.3, 12, false);";
-        String s2 = "INSERT INTO hello_world VALUES (\"ku78*&\",12.3, 12, false);";
-        runQuery(s1);
-        runQuery(s2);
-    }
 }

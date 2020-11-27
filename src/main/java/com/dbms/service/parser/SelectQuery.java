@@ -8,24 +8,24 @@ import java.util.regex.Pattern;
 
 public class SelectQuery {
 
-    private static final String errorMessage = "Invalid select query. Please check syntax/spacing.";
-    private static final String tableNameRegex = "(\\w+)";
-    private static final String columnNameRegex = "((?:\\*)|(?:(?:\\w+)(?:,\\s?\\w+)*))";
-    private static final String valueTypes = "(?:\".*\"|\\d+(?:\\.\\d+)?|TRUE|true|FALSE|false)";
-    private static final String conditionRegex = "(?:(?:\\sWHERE\\s)(\\w+=" + valueTypes + "))?";
-    private static final String selectRegex = "SELECT\\s" +
+    private final String errorMessage = "Invalid select query. Please check syntax/spacing.";
+    private final String tableNameRegex = "(\\w+)";
+    private final String columnNameRegex = "((?:\\*)|(?:(?:\\w+)(?:,\\s?\\w+)*))";
+    private final String valueTypes = "(?:\".*\"|\\d+(?:\\.\\d+)?|TRUE|true|FALSE|false)";
+    private final String conditionRegex = "(?:(?:\\sWHERE\\s)(\\w+=" + valueTypes + "))?";
+    private final String selectRegex = "SELECT\\s" +
             columnNameRegex +
             "\\sFROM\\s" +
             tableNameRegex +
             conditionRegex +
             ";?$";
 
-    public static void runQuery(String selectQuery) {
+    public void runQuery(String selectQuery) {
         JSONObject parsedQuery = parseSelectQuery(selectQuery);
         executeSelectQuery(parsedQuery);
     }
 
-    public static JSONObject parseSelectQuery(String selectQuery) {
+    public JSONObject parseSelectQuery(String selectQuery) {
         JSONObject selectObject = new JSONObject();
         try {
             Pattern syntaxExp = Pattern.compile(selectRegex, Pattern.CASE_INSENSITIVE);
@@ -50,7 +50,7 @@ public class SelectQuery {
         }
     }
 
-    public static boolean executeSelectQuery(JSONObject parsedQuery) {
+    public boolean executeSelectQuery(JSONObject parsedQuery) {
         try {
             String tableName = (String) parsedQuery.get("tableName");
             JSONArray columns = (JSONArray) parsedQuery.get("columns");
@@ -68,7 +68,7 @@ public class SelectQuery {
         }
     }
 
-    private static JSONArray getColumnArray(String columnNames) {
+    private JSONArray getColumnArray(String columnNames) {
         JSONArray columns = new JSONArray();
         if(columnNames == null || columnNames.isEmpty()) {
             return columns;
@@ -83,7 +83,7 @@ public class SelectQuery {
         return columns;
     }
 
-    private static JSONObject getMappings(String assignments) {
+    private JSONObject getMappings(String assignments) {
         try {
             JSONObject assignmentMapping = new JSONObject();
             if(assignments == null || assignments.isEmpty()) {
@@ -120,14 +120,4 @@ public class SelectQuery {
         }
     }
 
-    public static void main(String []a) {
-        String s1 = "SELECT col1,col2 FROM table1 WHERE col1=\"12.3\";";
-        String s2 = "SELECT col1,col2 FROM table1;";
-        String s3 = "SELECT * FROM table1 WHERE col1=\"12.3\";";
-        String s4 = "SELECT * FROM table1";
-        runQuery(s1);
-        runQuery(s2);
-        runQuery(s3);
-        runQuery(s4);
-    }
 }

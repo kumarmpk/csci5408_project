@@ -36,9 +36,11 @@ public class CreateLoadDatabase {
 
     @Autowired
     private Resource resource;
+
     String dbname;
     String datapath;
-    public Map<String, JSONArray> createLoadDatabase(User user) throws Exception {
+
+    /*public Map<String, JSONArray> createLoadDatabase(User user) throws Exception {
         Map<String, JSONArray> tableRecords = null;
         String userResponse;
         boolean invalidUserResponse = true;
@@ -61,7 +63,7 @@ public class CreateLoadDatabase {
             }
         }
         return tableRecords;
-    }
+    }*/
 
     private Map<String, JSONArray> createDatabase(String userName) throws IOException {
         String userResponse = readUserInput
@@ -108,21 +110,15 @@ public class CreateLoadDatabase {
         return isExist;
     }
 
-    private Map<String, JSONArray> loadDatabase(String userName) throws Exception {
-        Map<String, JSONArray> tableRecords = null;
-        boolean invalidResponse = true;
-        while(invalidResponse) {
-            String dbName = readUserInput.getStringInput("Enter the database to load.");
-            if (validation.isValidInput(dbName) && checkDBNameUserName(dbName, userName)) {
-                tableRecords = loadTables(dbName, userName);
-                dbname=dbName;
-                invalidResponse = false;
-            } else {
-                consoleOutput.warning("The database does not exist. Kindly provide existing database name.");
-                invalidResponse = true;
-            }
+    public void loadDatabase(User user, String dbName) throws Exception {
+        Map<String, JSONArray> tableRecords;
+        String userName = user.getUserName();
+        if (checkDBNameUserName(dbName, userName)) {
+            tableRecords = loadTables(dbName, userName);
+            user.getCompleteDatabase().setTableRecords(tableRecords);
+        } else{
+            consoleOutput.print("Database does not exist. Please load existing database or create new.");
         }
-        return tableRecords;
     }
 
     private Map<String, JSONArray> loadTables(String dbName, String userName) throws Exception {

@@ -9,6 +9,8 @@ public class User implements Comparable<User>{
     private String password;
     private Date createdDate;
     private Date lastLoggedInDate;
+    private CompleteDatabase completeDatabase;
+    private Transaction transaction;
 
     public long getId() {
         return id;
@@ -48,6 +50,22 @@ public class User implements Comparable<User>{
 
     public void setLastLoggedInDate(Date lastLoggedInDate) {
         this.lastLoggedInDate = lastLoggedInDate;
+    }
+
+    public CompleteDatabase getCompleteDatabase() {
+        return completeDatabase;
+    }
+
+    public void setCompleteDatabase(CompleteDatabase completeDatabase) {
+        this.completeDatabase = completeDatabase;
+    }
+
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
     }
 
     @Override

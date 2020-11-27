@@ -2,10 +2,13 @@ package com.dbms.service.parser;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.springframework.stereotype.Component;
+
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class SelectQuery {
 
     private static final String errorMessage = "Invalid select query. Please check syntax/spacing.";

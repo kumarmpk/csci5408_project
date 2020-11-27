@@ -2,9 +2,12 @@ package com.dbms.service.parser;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.springframework.stereotype.Component;
+
 import java.util.Collections;
 import java.util.regex.*;
 
+@Component
 public class InsertQuery {
 
     private static final String errorMessage = "Invalid insert query. Please check syntax/spacing.";

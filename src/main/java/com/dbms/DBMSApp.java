@@ -3,6 +3,7 @@ package com.dbms;
 import com.dbms.models.CompleteDatabase;
 import com.dbms.models.User;
 import com.dbms.service.CreateLoadDatabase;
+import com.dbms.service.QueryExecution;
 import com.dbms.service.UserAuthentication;
 import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,7 @@ public class DBMSApp implements CommandLineRunner {
     private UserAuthentication userAuth;
 
     @Autowired
-    private CreateLoadDatabase createLoadDatabase;
-
-    private CompleteDatabase completeDatabase;
+    private QueryExecution queryExecution;
 
     public static void main(String[] args) throws Exception {
 
@@ -36,12 +35,11 @@ public class DBMSApp implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        User user = userAuth.userRegisterLogin();
-        if(user != null) {
-            completeDatabase = CompleteDatabase.getInstance();
-            completeDatabase.setUser(user);
-            Map<String, JSONArray> tableRecords = createLoadDatabase.createLoadDatabase(user);
-            completeDatabase.setTableRecords(tableRecords);
+        while(true) {
+            User user = userAuth.userRegisterLogin();
+            if (user != null) {
+                queryExecution.queryConsole(user);
+            }
         }
     }
 

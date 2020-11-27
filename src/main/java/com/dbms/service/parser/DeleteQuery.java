@@ -1,9 +1,12 @@
 package com.dbms.service.parser;
 
 import org.json.simple.JSONObject;
+import org.springframework.stereotype.Component;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class DeleteQuery {
 
     private static final String errorMessage = "Invalid delete query. Please check syntax/spacing.";

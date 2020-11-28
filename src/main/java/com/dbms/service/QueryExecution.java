@@ -22,6 +22,7 @@ public class QueryExecution {
     private String desc = "desc";
     private String exit = "exit";
     private String use = "use";
+    private String generateERD = "generateERD";
 
     @Autowired
     private DDLController ddlController;
@@ -43,6 +44,9 @@ public class QueryExecution {
 
     @Autowired
     private Validation validation;
+
+    @Autowired
+    private ERDGenerator erdGenerator;
 
     public QueryExecution(){
         createDDLList();
@@ -71,8 +75,10 @@ public class QueryExecution {
         while(invalidUserResponse) {
             userResponse = readUserInput
                     .getStringInput("Console to execute Queries\n" +
-                                    "provide a query to execute\n" +
-                                    "type exit to quit the app\n" +
+                            "1. provide a query to execute\n" +
+                            "2. type exit to quit the app\n" +
+                            "3. type generateERD to create ERD image\n" +
+                            "4. type exportDump to create DDL scripts of the database\n"+
                             "sql: ");
             if (validation.isValidInput(userResponse)) {
                 userResponse = userResponse.trim();
@@ -104,6 +110,8 @@ public class QueryExecution {
                             dmlController.processQuery(user, userResponse);
                         } else if (userResponse.equalsIgnoreCase(exit)) {
                             break;
+                        } else if(userResponse.equalsIgnoreCase(generateERD)){
+                            erdGenerator.generateERD(user.getCompleteDatabase().getDbName());
                         } else {
                             consoleOutput.print("Invalid query.");
                         }

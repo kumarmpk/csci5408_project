@@ -14,7 +14,7 @@ public class DDLController {
 
     @Autowired
     private CreateTable createTable;
-    
+
     public void processQuery(User user, String query){
         String words[] = query.split(" ");
         int queryWordCount = words.length;

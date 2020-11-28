@@ -9,6 +9,7 @@ public class CompleteDatabase {
 
     private Map<String, JSONArray> tableRecords;
     private JSONObject metaData;
+    private String dbName;
 
     public CompleteDatabase(){}
 
@@ -26,5 +27,13 @@ public class CompleteDatabase {
 
     public void setMetaData(JSONObject metaData) {
         this.metaData = metaData;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
     }
 }

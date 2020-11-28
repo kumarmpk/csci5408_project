@@ -116,6 +116,7 @@ public class CreateLoadDatabase {
         if (checkDBNameUserName(dbName, userName)) {
             tableRecords = loadTables(dbName, userName);
             user.getCompleteDatabase().setTableRecords(tableRecords);
+            user.getCompleteDatabase().setDbName(dbName);
         } else{
             consoleOutput.print("Database does not exist. Please load existing database or create new.");
         }

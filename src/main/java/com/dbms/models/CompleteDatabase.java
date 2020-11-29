@@ -11,7 +11,9 @@ public class CompleteDatabase {
     private JSONObject metaData;
     private String dbName;
 
-    public CompleteDatabase(){}
+    public CompleteDatabase(){
+    	
+    }
 
     public Map<String, JSONArray> getTableRecords() {
         return tableRecords;

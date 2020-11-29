@@ -113,6 +113,7 @@ public class CreateLoadDatabase {
     public void loadDatabase(User user, String dbName) throws Exception {
         Map<String, JSONArray> tableRecords;
         String userName = user.getUserName();
+        dbname=dbName;
         if (checkDBNameUserName(dbName, userName)) {
             tableRecords = loadTables(dbName, userName);
             user.getCompleteDatabase().setTableRecords(tableRecords);

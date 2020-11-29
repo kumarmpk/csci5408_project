@@ -1,6 +1,13 @@
 package com.dbms.service;
 
 import com.dbms.models.User;
+import com.dbms.service.parser.DeleteQuery;
+import com.dbms.service.parser.InsertQuery;
+import com.dbms.service.parser.SelectQuery;
+import com.dbms.service.parser.UpdateQuery;
+import com.dbms.service.parser.CreateDB;
+import com.dbms.service.parser.CreateTable;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +20,10 @@ public class DDLController {
     private final String alter = "alter";
 
     @Autowired
-    private CreateTable createTable;
+    private CreateDB createdbQuery;
+    
+    @Autowired
+    private CreateTable createtableQuery;
 
     public void processQuery(User user, String query){
         String words[] = query.split(" ");
@@ -22,7 +32,12 @@ public class DDLController {
             String qyeryType = words[0];
             switch (qyeryType) {
                 case create:
-
+                	if(query.contains("DATABASE")||(query.contains("database"))) {
+                	createdbQuery.runDBQuery(query, user);
+                	}
+                	if(query.contains("TABLE")||(query.contains("table"))) {
+                		createtableQuery.runTableQuery(query, user);
+                    	}
                     break;
                 case alter:
 

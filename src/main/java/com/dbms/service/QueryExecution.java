@@ -89,13 +89,16 @@ public class QueryExecution {
                         userResponse = userResponse.substring(0, userResponseLength - 2);
                     }
                     String[] words = userResponse.split(" ");
+                    System.out.println("words="+words);
                     String queryType = words[0];
+                    System.out.println("word0="+words[0]);
 
                     if(queryType.equalsIgnoreCase(use)){
                         generalController.loadDB(user, userResponse);
                     }
                     else{
                         CompleteDatabase completeDatabase = user.getCompleteDatabase();
+
                         if(completeDatabase == null){
                             consoleOutput.print("Please load a database to show the tables in the database.");
                         } else if (userResponse.equalsIgnoreCase(showTables)) {

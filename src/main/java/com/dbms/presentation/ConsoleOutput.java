@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 @Component
 public class ConsoleOutput implements IConsoleOutput{
 
-    Logger logger = new DBMSLogger(ConsoleOutput.class.getName()).logger;
+    Logger logger = DBMSLogger.getLogger(ConsoleOutput.class.getName());
 
     @Override
     public void info(String text) {

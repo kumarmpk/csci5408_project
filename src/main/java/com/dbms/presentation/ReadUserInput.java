@@ -11,7 +11,7 @@ public class ReadUserInput implements IReadUserInput {
 
     private Scanner scanner;
 
-    Logger logger = new DBMSLogger(ConsoleOutput.class.getName()).logger;
+    Logger logger = DBMSLogger.getLogger(ConsoleOutput.class.getName());
 
     public ReadUserInput(){
         scanner = new Scanner(System.in);

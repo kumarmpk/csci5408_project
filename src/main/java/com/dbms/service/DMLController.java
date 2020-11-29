@@ -38,8 +38,8 @@ public class DMLController {
         String words[] = query.split(" ");
         int queryWordCount = words.length;
         if(queryWordCount > 1) {
-            String qyeryType = words[0];
-            switch (qyeryType) {
+            String queryType = words[0];
+            switch (queryType) {
                 case insert:
                     insertQuery.runQuery(query);
                     break;

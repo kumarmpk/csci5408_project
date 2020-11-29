@@ -14,8 +14,9 @@ public class SelectQuery {
     private final String errorMessage = "Invalid select query. Please check syntax/spacing.";
     private final String tableNameRegex = "(\\w+)";
     private final String columnNameRegex = "((?:\\*)|(?:(?:\\w+)(?:,\\s?\\w+)*))";
-    private final String valueTypes = "(?:\".*\"|\\d+(?:\\.\\d+)?|TRUE|true|FALSE|false)";
-    private final String conditionRegex = "(?:(?:\\sWHERE\\s)(\\w+=" + valueTypes + "))?";
+    private final String ConditionValueTypes = "(\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
+    private final String conditionEquality = "(=|<=|>=|>|<)";
+    private final String conditionRegex = "(?:(?:\\sWHERE\\s)(?:(\\w+)" + (conditionEquality) + ConditionValueTypes + "))?";
     private final String selectRegex = "SELECT\\s" +
             columnNameRegex +
             "\\sFROM\\s" +
@@ -35,17 +36,23 @@ public class SelectQuery {
             Matcher queryParts = syntaxExp.matcher(selectQuery);
             String tableName = null;
             String columnNames = null;
-            String condition = null;
+            String conditionCol = null;
+            String conditionType = null;
+            String conditionVal = null;
             if(queryParts.find()) {
                 columnNames = queryParts.group(1);
                 tableName = queryParts.group(2);
-                condition = queryParts.group(3);
+                conditionCol = queryParts.group(3);
+                conditionType = queryParts.group(4);
+                conditionVal = queryParts.group(5);
             } else {
                 System.out.println(errorMessage);
             }
             selectObject.put("tableName", tableName);
             selectObject.put("columns", getColumnArray(columnNames));
-            selectObject.put("condition", getMappings(condition));
+            selectObject.put("conditionCol", conditionCol);
+            selectObject.put("conditionType", conditionType);
+            selectObject.put("conditionVal", conditionVal);
             return selectObject;
         } catch(Exception e) {
             System.out.println(e.getLocalizedMessage());
@@ -57,7 +64,9 @@ public class SelectQuery {
         try {
             String tableName = (String) parsedQuery.get("tableName");
             JSONArray columns = (JSONArray) parsedQuery.get("columns");
-            JSONObject condition = (JSONObject) parsedQuery.get("condition");
+            String conditionCol = (String) parsedQuery.get("conditionCol");
+            String conditionType = (String) parsedQuery.get("conditionType");
+            String conditionVal = (String) parsedQuery.get("conditionVal");
             if (tableName.isEmpty() || columns.isEmpty()) {
                 System.out.println(errorMessage);
                 return false;

@@ -12,7 +12,9 @@ public class DeleteQuery {
     private final String errorMessage = "Invalid delete query. Please check syntax/spacing.";
     private final String tableNameRegex = "(\\w+)";
     private final String valueTypes = "(?:\".*\"|\\d+(?:\\.\\d+)?|TRUE|true|FALSE|false)";
-    private final String conditionRegex = "(?:(?:\\sWHERE\\s)(\\w+=" + valueTypes + "))?";
+    private final String ConditionValueTypes = "(\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
+    private final String conditionEquality = "(=|<=|>=|>|<)";
+    private final String conditionRegex = "(?:(?:\\sWHERE\\s)(?:(\\w+)" + (conditionEquality) + ConditionValueTypes + "))?";
     private final String deleteRegex = "DELETE FROM\\s" +
             tableNameRegex +
             conditionRegex +
@@ -29,15 +31,21 @@ public class DeleteQuery {
             Pattern syntaxExp = Pattern.compile(deleteRegex, Pattern.CASE_INSENSITIVE);
             Matcher queryParts = syntaxExp.matcher(deleteQuery);
             String tableName = null;
-            String condition = null;
+            String conditionCol = null;
+            String conditionType = null;
+            String conditionVal = null;
             if(queryParts.find()) {
                 tableName = queryParts.group(1);
-                condition = queryParts.group(2);
+                conditionCol = queryParts.group(2);
+                conditionType = queryParts.group(3);
+                conditionVal = queryParts.group(4);
             } else {
                 System.out.println(errorMessage);
             }
             selectObject.put("tableName", tableName);
-            selectObject.put("condition", getMappings(condition));
+            selectObject.put("conditionCol", conditionCol);
+            selectObject.put("conditionType", conditionType);
+            selectObject.put("conditionVal", conditionVal);
             return selectObject;
         } catch(Exception e) {
             System.out.println(e.getLocalizedMessage());
@@ -48,7 +56,9 @@ public class DeleteQuery {
     public boolean executeDeleteQuery(JSONObject parsedQuery) {
         try {
             String tableName = (String) parsedQuery.get("tableName");
-            JSONObject condition = (JSONObject) parsedQuery.get("condition");
+            String conditionCol = (String) parsedQuery.get("conditionCol");
+            String conditionType = (String) parsedQuery.get("conditionType");
+            String conditionVal = (String) parsedQuery.get("conditionVal");
             if (tableName.isEmpty()) {
                 System.out.println(errorMessage);
                 return false;

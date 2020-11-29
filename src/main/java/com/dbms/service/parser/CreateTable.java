@@ -28,9 +28,9 @@ import java.util.regex.*;
 @Component
 public class CreateTable {
 
-	@Autowired
+	/*@Autowired
 	private CreateLoadDatabase dbname;
-
+*/
 	@Autowired
 	private ReadFile readFile;
 	public  String dbPath = Paths.get("").toAbsolutePath().toString() + "\\data\\";
@@ -118,8 +118,11 @@ public class CreateTable {
 			tables.add(parsedQuery);
 			JSONParser jsonParser = new JSONParser();
 
+			System.out.println("dbname="+CreateLoadDatabase.dbname);
+			System.out.println("user="+user.getUserName());
+			System.out.println("path="+(dbPath+user.getUserName()+"_"+CreateLoadDatabase.dbname+"\\"+"metadata"+".json"));
 
-			FileReader file1 = new FileReader(dbPath+user.getUserName()+"_"+dbname+"\\"+"metadata"+".json");
+			FileReader file1 = new FileReader(dbPath+user.getUserName()+"_"+CreateLoadDatabase.dbname+"\\"+"metadata"+".json");
 			Object obj = jsonParser.parse(file1);
 			JSONObject object1 = new JSONObject();
 			JSONArray object2 = new JSONArray();
@@ -135,7 +138,7 @@ public class CreateTable {
 				System.out.println("object2="+object2);
 
 			}	           
-			try (FileWriter file = new FileWriter(dbPath+user.getUserName()+"_"+dbname+"\\"+"metadata"+".json", false)) {
+			try (FileWriter file = new FileWriter(dbPath+user.getUserName()+"_"+CreateLoadDatabase.dbname+"\\"+"metadata"+".json", false)) {
 
 				file.write("");
 

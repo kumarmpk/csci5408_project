@@ -38,7 +38,7 @@ public class CreateLoadDatabase {
     @Autowired
     private Resource resource;
 
-    String dbname;
+   public static String dbname;
     String datapath;
 
     /*public Map<String, JSONArray> createLoadDatabase(User user) throws Exception {

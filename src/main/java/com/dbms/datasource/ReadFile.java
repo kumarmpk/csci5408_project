@@ -2,6 +2,7 @@ package com.dbms.datasource;
 
 import com.dbms.presentation.IConsoleOutput;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +27,30 @@ public class ReadFile implements IReadFile{
     private Resource resource;
 
     @Override
-    public JSONArray readJSON(String filePath) throws IOException, ParseException {
+    public JSONArray readJSONArrayFromFile(String filePath) throws IOException, ParseException {
         JSONParser jsonParser = new JSONParser();
         try{
             FileReader reader = new FileReader(filePath);
             JSONArray userJsonArray = (JSONArray) jsonParser.parse(reader);
             return userJsonArray;
+        } catch (FileNotFoundException e) {
+            consoleOutput.error("ReadFile: readJSON: File not found. " + e);
+            throw e;
+        } catch (IOException e) {
+            consoleOutput.error("ReadFile: readJSON: File read failed. " + e);
+            throw e;
+        } catch (ParseException e) {
+            consoleOutput.error("ReadFile: readJSON: Imported file is not valid. Please make sure it is JSON format or if all fields are either boolean,string,array,object");
+            throw e;
+        }
+    }
+
+    public JSONObject readJSONObjectFromFile(String filePath) throws IOException, ParseException {
+        JSONParser jsonParser = new JSONParser();
+        try{
+            FileReader reader = new FileReader(filePath);
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
+            return jsonObject;
         } catch (FileNotFoundException e) {
             consoleOutput.error("ReadFile: readJSON: File not found. " + e);
             throw e;
@@ -56,12 +75,14 @@ public class ReadFile implements IReadFile{
                 files = new HashMap<>();
                 for (Path path : filePathList) {
                     String pathStr = path.toString();
-                    String[] pathArr = pathStr.split("\\\\");
-                    String fileNameWithExt = pathArr[pathArr.length - 1];
-                    String[] fileNameArr = fileNameWithExt.split("\\.");
-                    String fileName = fileNameArr[0];
-                    JSONArray arr = readJSON(pathStr);
-                    files.put(fileName, arr);
+                    if(!pathStr.contains("metadata.json")) {
+                        String[] pathArr = pathStr.split("\\\\");
+                        String fileNameWithExt = pathArr[pathArr.length - 1];
+                        String[] fileNameArr = fileNameWithExt.split("\\.");
+                        String fileName = fileNameArr[0];
+                        JSONArray arr = readJSONArrayFromFile(pathStr);
+                        files.put(fileName, arr);
+                    }
                 }
             }
         } catch (IOException e){

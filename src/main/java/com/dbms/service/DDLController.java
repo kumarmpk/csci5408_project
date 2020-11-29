@@ -33,11 +33,11 @@ public class DDLController {
             switch (qyeryType) {
                 case create:
                 	if(query.contains("DATABASE")||(query.contains("database"))) {
-                	createdbQuery.runDBQuery(query, user);
+                	    createdbQuery.runDBQuery(query, user);
                 	}
                 	if(query.contains("TABLE")||(query.contains("table"))) {
                 		createtableQuery.runTableQuery(query, user);
-                    	}
+                	}
                     break;
                 case alter:
 

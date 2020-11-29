@@ -23,6 +23,7 @@ public class QueryExecution {
     private String exit = "exit";
     private String use = "use";
     private String generateERD = "generateERD";
+    private String create = "create";
 
     @Autowired
     private DDLController ddlController;
@@ -99,7 +100,7 @@ public class QueryExecution {
                     else{
                         CompleteDatabase completeDatabase = user.getCompleteDatabase();
 
-                        if(completeDatabase == null){
+                        if(completeDatabase == null && !create.equalsIgnoreCase(queryType)){
                             consoleOutput.print("Please load a database to show the tables in the database.");
                         } else if (userResponse.equalsIgnoreCase(showTables)) {
                             generalController.showTables(user);

@@ -1,5 +1,6 @@
 package com.dbms.service.parser;
 
+import com.dbms.models.CompleteDatabase;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +76,7 @@ public class CreateDB {
 		}
 	}
 
-	public  boolean executeCreateDBQuery(JSONObject parsedQuery, User user) {
+	public boolean executeCreateDBQuery(JSONObject parsedQuery, User user) {
 		try {
 			String dbName = (String) parsedQuery.get("dbName");
 			if (dbName.isEmpty()) {
@@ -84,14 +85,18 @@ public class CreateDB {
 			}
 			createDirectory(dbName, user);
 
-			try (FileWriter file = new FileWriter(dbPath+user.getUserName()+"_"+dbName+"\\"+"metadata"+".json")) {
+			try (FileWriter file =
+						 new FileWriter(dbPath+
+								 user.getUserName()+"_"+dbName+"\\"+"metadata"+".json")) {
 				object.put("tables", tables);
 
 				file.write(object.toJSONString());
 				file.close();
+				user.setCompleteDatabase(new CompleteDatabase());
 
 			} catch (IOException e) {
 				e.printStackTrace();
+				throw e;
 			}
 			return true;
 		} catch (Exception e) {
@@ -104,17 +109,11 @@ public class CreateDB {
 
 		try {
 			Path path = Paths.get(dbPath + user.getUserName() + "_" + dbName);
-
 			Files.createDirectory(path);
 		} catch (IOException e){
 			System.out.println(e.getLocalizedMessage());
 			throw e;
 		}
 	}
-	/*   public static void main(String []a) {
-	        String s2 = "create DATABASE DataBase4";
-	        runDBQuery(s2);
-
-	    }*/
 
 }

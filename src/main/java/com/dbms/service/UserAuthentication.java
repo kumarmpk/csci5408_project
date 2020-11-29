@@ -1,13 +1,10 @@
 package com.dbms.service;
 
-import com.dbms.DBMSApp;
 import com.dbms.common.Validation;
 import com.dbms.datasource.IReadFile;
 import com.dbms.datasource.IWriteFile;
 import com.dbms.datasource.Resource;
-import com.dbms.models.CompleteDatabase;
 import com.dbms.models.User;
-import com.dbms.presentation.ConsoleOutput;
 import com.dbms.presentation.IConsoleOutput;
 import com.dbms.presentation.IReadUserInput;
 import org.json.simple.JSONArray;
@@ -169,7 +166,7 @@ public class UserAuthentication {
     }
 
     public JSONArray getUserFile() throws IOException, ParseException {
-        return readFile.readJSON(resource.dbPath+"user.json");
+        return readFile.readJSONArrayFromFile(resource.dbPath+"user.json");
     }
 
 

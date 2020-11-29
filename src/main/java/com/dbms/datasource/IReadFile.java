@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface IReadFile {
 
-    JSONArray readJSON(String filePath) throws IOException, ParseException;
+    JSONArray readJSONArrayFromFile(String filePath) throws IOException, ParseException;
 
     Map<String, JSONArray> readFilesFromPath(String dirPath) throws Exception;
 

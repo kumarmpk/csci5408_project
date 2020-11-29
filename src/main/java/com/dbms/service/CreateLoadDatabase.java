@@ -4,6 +4,7 @@ import com.dbms.common.Constants;
 import com.dbms.common.Validation;
 import com.dbms.datasource.ReadFile;
 import com.dbms.datasource.Resource;
+import com.dbms.models.CompleteDatabase;
 import com.dbms.models.User;
 import com.dbms.presentation.ConsoleOutput;
 import com.dbms.presentation.ReadUserInput;
@@ -116,6 +117,7 @@ public class CreateLoadDatabase {
         dbname=dbName;
         if (checkDBNameUserName(dbName, userName)) {
             tableRecords = loadTables(dbName, userName);
+            user.setCompleteDatabase(new CompleteDatabase());
             user.getCompleteDatabase().setTableRecords(tableRecords);
             user.getCompleteDatabase().setDbName(dbName);
         } else{

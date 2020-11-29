@@ -11,6 +11,7 @@ public class User implements Comparable<User>{
     private Date lastLoggedInDate;
     private CompleteDatabase completeDatabase;
     private Transaction transaction;
+    private String userGroup;
 
     public long getId() {
         return id;
@@ -66,6 +67,14 @@ public class User implements Comparable<User>{
 
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
+    }
+
+    public String getUserGroup() {
+        return userGroup;
+    }
+
+    public void setUserGroup(String userGroup) {
+        this.userGroup = userGroup;
     }
 
     @Override

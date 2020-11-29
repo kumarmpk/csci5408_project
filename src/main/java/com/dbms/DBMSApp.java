@@ -1,5 +1,6 @@
 package com.dbms;
 
+import com.dbms.models.AppInfo;
 import com.dbms.models.CompleteDatabase;
 import com.dbms.models.User;
 import com.dbms.service.CreateLoadDatabase;
@@ -12,6 +13,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.List;
 import java.util.Map;
 
 @SpringBootApplication
@@ -38,8 +40,24 @@ public class DBMSApp implements CommandLineRunner {
         while(true) {
             User user = userAuth.userRegisterLogin();
             if (user != null) {
+                checkAppInfo(user);
                 queryExecution.queryConsole(user);
             }
+        }
+    }
+
+    public void checkAppInfo(User user){
+        AppInfo appInfo = AppInfo.getInstance();
+        boolean userAlreadyExists = false;
+        List<User> appInfoUserList = appInfo.getUserList();
+        for(User appInfoUser : appInfoUserList){
+            if(appInfoUser.getUserName().equalsIgnoreCase(user.getUserName())){
+                userAlreadyExists = true;
+                return;
+            }
+        }
+        if(!userAlreadyExists){
+               appInfoUserList.add(user);
         }
     }
 

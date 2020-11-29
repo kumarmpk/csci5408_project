@@ -52,6 +52,32 @@ public class DDLController {
         }
     }
 
+    public void processQueryForTransaction(User user, String query){
+        String words[] = query.split(" ");
+        int queryWordCount = words.length;
+        if(queryWordCount > 1) {
+            String qyeryType = words[0];
+            switch (qyeryType) {
+                case create:
+                    if(query.contains("DATABASE")||(query.contains("database"))) {
+                        createdbQuery.parseCreateDBQuery(query);
+                    }
+                    if(query.contains("TABLE")||(query.contains("table"))) {
+                        createtableQuery.parseCreateTableQuery(query);
+                    }
+                    break;
+                case alter:
+
+                    break;
+                case drop:
+
+                    break;
+                case truncate:
+
+                    break;
+            }
+        }
+    }
 
 
 }

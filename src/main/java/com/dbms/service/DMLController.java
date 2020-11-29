@@ -56,4 +56,26 @@ public class DMLController {
         }
     }
 
+    public void processQueryForTransaction(User user, String query){
+        String words[] = query.split(" ");
+        int queryWordCount = words.length;
+        if(queryWordCount > 1) {
+            String queryType = words[0];
+            switch (queryType) {
+                case insert:
+                    insertQuery.parseInsertQuery(query);
+                    break;
+                case select:
+                    selectQuery.parseSelectQuery(query);
+                    break;
+                case delete:
+                    deleteQuery.parseDeleteQuery(query);
+                    break;
+                case update:
+                    updateQuery.parseUpdateQuery(query);
+                    break;
+            }
+        }
+    }
+
 }

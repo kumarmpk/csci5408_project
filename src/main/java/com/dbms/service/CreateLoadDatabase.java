@@ -120,6 +120,7 @@ public class CreateLoadDatabase {
             user.setCompleteDatabase(new CompleteDatabase());
             user.getCompleteDatabase().setTableRecords(tableRecords);
             user.getCompleteDatabase().setDbName(dbName);
+            user.getCompleteDatabase().setMetaData(user);
         } else{
             consoleOutput.print("Database does not exist. Please load existing database or create new.");
         }

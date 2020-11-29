@@ -41,16 +41,16 @@ public class DMLController {
             String queryType = words[0];
             switch (queryType) {
                 case insert:
-                    insertQuery.runQuery(query);
+                    insertQuery.runQuery(query, user);
                     break;
                 case select:
-                    selectQuery.runQuery(query);
+                    selectQuery.runQuery(query, user);
                     break;
                 case delete:
-                    deleteQuery.runQuery(query);
+                    deleteQuery.runQuery(query, user);
                     break;
                 case update:
-                    updateQuery.runQuery(query);
+                    updateQuery.runQuery(query, user);
                     break;
             }
         }

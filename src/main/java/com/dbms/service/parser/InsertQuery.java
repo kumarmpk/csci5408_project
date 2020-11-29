@@ -1,10 +1,12 @@
 package com.dbms.service.parser;
 
+import com.dbms.models.User;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.regex.*;
 
 @Component
@@ -25,9 +27,9 @@ public class InsertQuery {
             columnValuesRegex +
             ";?$";
 
-    public void runQuery(String insertQuery) {
+    public void runQuery(String insertQuery, User user) {
         JSONObject parsedQuery = parseInsertQuery(insertQuery);
-        executeInsertQuery(parsedQuery);
+        executeInsertQuery(parsedQuery, user);
     }
 
     public JSONObject parseInsertQuery(String insertQuery) {
@@ -55,7 +57,7 @@ public class InsertQuery {
         }
     }
 
-    public boolean executeInsertQuery(JSONObject parsedQuery) {
+    public boolean executeInsertQuery(JSONObject parsedQuery, User user) {
         try {
             String tableName = (String) parsedQuery.get("tableName");
             JSONArray columns = (JSONArray) parsedQuery.get("columns");
@@ -65,6 +67,9 @@ public class InsertQuery {
                 return false;
             }
             System.out.println(parsedQuery);
+            String dbName = user.getCompleteDatabase().getDbName();
+            JSONObject metaData = user.getCompleteDatabase().getMetaData();
+            Map<String, JSONArray> x = user.getCompleteDatabase().getTableRecords();
             // get data
             return true;
         } catch (Exception e) {

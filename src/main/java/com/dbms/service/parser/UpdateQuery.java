@@ -1,8 +1,11 @@
 package com.dbms.service.parser;
 
+import com.dbms.models.User;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,9 +27,9 @@ public class UpdateQuery {
             conditionRegex +
             ";?$";
 
-    public void runQuery(String updateQuery) {
+    public void runQuery(String updateQuery, User user) {
         JSONObject parsedQuery = parseUpdateQuery(updateQuery);
-        executeUpdateQuery(parsedQuery);
+        executeUpdateQuery(parsedQuery, user);
     }
 
     public JSONObject parseUpdateQuery(String updateQuery) {
@@ -60,7 +63,7 @@ public class UpdateQuery {
         }
     }
 
-    public boolean executeUpdateQuery(JSONObject parsedQuery) {
+    public boolean executeUpdateQuery(JSONObject parsedQuery, User user) {
         try {
             String tableName = (String) parsedQuery.get("tableName");
             JSONObject assignments = (JSONObject) parsedQuery.get("assignments");
@@ -72,6 +75,9 @@ public class UpdateQuery {
                 return false;
             }
             System.out.println(parsedQuery);
+            String dbName = user.getCompleteDatabase().getDbName();
+            JSONObject metaData = user.getCompleteDatabase().getMetaData();
+            Map<String, JSONArray> x = user.getCompleteDatabase().getTableRecords();
             // get column types and data and update
             return true;
         } catch (Exception e) {

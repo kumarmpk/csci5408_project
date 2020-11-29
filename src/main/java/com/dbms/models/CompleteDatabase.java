@@ -2,7 +2,13 @@ package com.dbms.models;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Map;
 
 public class CompleteDatabase {
@@ -10,6 +16,7 @@ public class CompleteDatabase {
     private Map<String, JSONArray> tableRecords;
     private JSONObject metaData;
     private String dbName;
+    private String dbPath = Paths.get("").toAbsolutePath().toString() + "\\data\\";
 
     public CompleteDatabase(){
     	
@@ -27,8 +34,15 @@ public class CompleteDatabase {
         return metaData;
     }
 
-    public void setMetaData(JSONObject metaData) {
-        this.metaData = metaData;
+    public void setMetaData(User user) {
+        try {
+            JSONParser jsonParser = new JSONParser();
+            FileReader file1 = new FileReader(dbPath+user.getUserName()+"_"+this.dbName+"\\"+"metadata"+".json");
+            Object obj = jsonParser.parse(file1);
+            this.metaData = (JSONObject) obj;
+        } catch (Exception e) {
+            System.out.println("No metadata found for" + user.getUserName() + "_" + this.dbName);
+        }
     }
 
     public String getDbName() {

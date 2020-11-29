@@ -1,8 +1,11 @@
 package com.dbms.service.parser;
 
+import com.dbms.models.User;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,9 +23,9 @@ public class DeleteQuery {
             conditionRegex +
             ";?$";
 
-    public void runQuery(String deleteQuery) {
+    public void runQuery(String deleteQuery, User user) {
         JSONObject parsedQuery = parseDeleteQuery(deleteQuery);
-        executeDeleteQuery(parsedQuery);
+        executeDeleteQuery(parsedQuery, user);
     }
 
     public JSONObject parseDeleteQuery(String deleteQuery) {
@@ -53,7 +56,7 @@ public class DeleteQuery {
         }
     }
 
-    public boolean executeDeleteQuery(JSONObject parsedQuery) {
+    public boolean executeDeleteQuery(JSONObject parsedQuery, User user) {
         try {
             String tableName = (String) parsedQuery.get("tableName");
             String conditionCol = (String) parsedQuery.get("conditionCol");
@@ -64,6 +67,9 @@ public class DeleteQuery {
                 return false;
             }
             System.out.println(parsedQuery);
+            String dbName = user.getCompleteDatabase().getDbName();
+            JSONObject metaData = user.getCompleteDatabase().getMetaData();
+            Map<String, JSONArray> x = user.getCompleteDatabase().getTableRecords();
             // get data and delete
             return true;
         } catch (Exception e) {
@@ -71,42 +77,4 @@ public class DeleteQuery {
             return false;
         }
     }
-
-    private JSONObject getMappings(String assignments) {
-        try {
-            JSONObject assignmentMapping = new JSONObject();
-            if(assignments == null || assignments.isEmpty()) {
-                return assignmentMapping;
-            }
-            int currentIndex = 0;
-            while(currentIndex < assignments.length()) {
-                String key, val;
-                if (assignments.charAt(currentIndex) == ',') {
-                    currentIndex = currentIndex + 1;
-                    continue;
-                }
-                int keyIndex = assignments.indexOf("=", currentIndex);
-                key = assignments.substring(currentIndex, keyIndex);
-                int valStart = keyIndex + 1;
-                int valEnd;
-                if (assignments.charAt(valStart) == '"') {
-                    valStart = valStart + 1;
-                    valEnd = assignments.indexOf('"', valStart);
-                } else {
-                    valEnd = valStart + 1;
-                    while(valEnd < assignments.length() && assignments.charAt(valEnd) != ',') {
-                        valEnd = valEnd + 1;
-                    }
-                }
-                val = assignments.substring(valStart, valEnd);
-                assignmentMapping.put(key, val);
-                currentIndex = valEnd + 1;
-            }
-            return assignmentMapping;
-        } catch (Exception e) {
-            System.out.println(e.getLocalizedMessage());
-            return null;
-        }
-    }
-
 }

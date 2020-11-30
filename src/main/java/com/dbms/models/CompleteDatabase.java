@@ -34,14 +34,15 @@ public class CompleteDatabase {
         return metaData;
     }
 
-    public void setMetaData(User user) {
+    public void setMetaData(String userName) {
         try {
             JSONParser jsonParser = new JSONParser();
-            FileReader file1 = new FileReader(dbPath+user.getUserName()+"_"+this.dbName+"\\"+"metadata"+".json");
+            FileReader file1 = new FileReader(dbPath + userName + "_" + this.dbName + "\\"
+                    + "metadata" + ".json");
             Object obj = jsonParser.parse(file1);
             this.metaData = (JSONObject) obj;
         } catch (Exception e) {
-            System.out.println("No metadata found for" + user.getUserName() + "_" + this.dbName);
+            System.out.println("No metadata found for" + userName + "_" + this.dbName);
         }
     }
 

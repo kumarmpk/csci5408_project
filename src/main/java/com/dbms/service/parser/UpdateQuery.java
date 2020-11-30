@@ -1,10 +1,13 @@
 package com.dbms.service.parser;
 
 import com.dbms.models.User;
+import com.dbms.presentation.IConsoleOutput;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,14 +15,20 @@ import java.util.regex.Pattern;
 @Component
 public class UpdateQuery {
 
+    @Autowired
+    private IConsoleOutput logger;
+
+    @Autowired
+    private Utils utils;
+
     private final String errorMessage = "Invalid update query. Please check syntax/spacing.";
     private final String tableNameRegex = "(\\w+)";
     private final String valueTypes = "(?:\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
     private final String ConditionValueTypes = "(\".*\"|\\d+(?:.\\d+)?|TRUE|true|FALSE|false)";
-    private final String conditionEquality = "(=|<=|>=|>|<)";
+    private final String conditionEquality = "(=|<=|>=|>|<|!=)";
     // no spaces allowed for updations
     private final String assignmentRegex = "((?:\\w+="+ valueTypes + ")(?:,\\w+="+ valueTypes + ")*)";
-    private final String conditionRegex = "(?:(?:\\sWHERE\\s)(?:(\\w+)" + (conditionEquality) + ConditionValueTypes + "))?";
+    private final String conditionRegex = "(?:(?:\\sWHERE\\s)(?:(\\w+)" + "\\s?" + (conditionEquality) + "\\s?" + ConditionValueTypes + "))?";
     private final String updateRegex = "UPDATE " +
             tableNameRegex +
             "\\sSET\\s" +
@@ -49,7 +58,7 @@ public class UpdateQuery {
                 conditionType = queryParts.group(4);
                 conditionVal = queryParts.group(5);
             } else {
-                System.out.println(errorMessage);
+                logger.error(errorMessage);
             }
             insertObject.put("tableName", tableName);
             insertObject.put("assignments", getMappings(assignments, "="));
@@ -58,7 +67,7 @@ public class UpdateQuery {
             insertObject.put("conditionVal", conditionVal);
             return insertObject;
         } catch(Exception e) {
-            System.out.println(e.getLocalizedMessage());
+            logger.error(e.getLocalizedMessage());
             return null;
         }
     }
@@ -71,17 +80,40 @@ public class UpdateQuery {
             String conditionType = (String) parsedQuery.get("conditionType");
             String conditionVal = (String) parsedQuery.get("conditionVal");
             if (tableName.isEmpty() || assignments.isEmpty()) {
-                System.out.println(errorMessage);
+                logger.error(errorMessage);
                 return false;
             }
-            System.out.println(parsedQuery);
+
             String dbName = user.getCompleteDatabase().getDbName();
             JSONObject metaData = user.getCompleteDatabase().getMetaData();
-            Map<String, JSONArray> x = user.getCompleteDatabase().getTableRecords();
-            // get column types and data and update
+            Map<String, JSONArray> tableRecords = user.getCompleteDatabase().getTableRecords();
+            JSONArray tablesMetaData = (JSONArray) metaData.get("tables");
+            JSONObject currentTableMetadata = null;
+            for (Object curObj : tablesMetaData) {
+                JSONObject tableObj = (JSONObject) curObj;
+                JSONObject metadata = (JSONObject) tableObj.get(tableName);
+                if (metadata != null) {
+                    currentTableMetadata = (JSONObject) metadata.get("columns");
+                    break;
+                }
+            }
+            if (currentTableMetadata == null) {
+                logger.error("Unable to fetch table metadata");
+                return false;
+            }
+
+            JSONArray currentTableRecords = tableRecords.get(tableName);
+            ArrayList filteredRows = new ArrayList();
+
+            JSONArray updatedRows = updateRows(conditionCol, conditionType, conditionVal,
+                    currentTableMetadata, currentTableRecords, assignments);
+
+            String fileNameWithDB = user.getUserName() + "_" + dbName + "\\" + tableName + ".json";
+
+            utils.updateTableFile(updatedRows.toJSONString(), fileNameWithDB);
             return true;
         } catch (Exception e) {
-            System.out.println(e.getLocalizedMessage());
+            logger.error(e.getLocalizedMessage());
             return false;
         }
     }
@@ -118,9 +150,96 @@ public class UpdateQuery {
             }
             return assignmentMapping;
         } catch (Exception e) {
-            System.out.println(e.getLocalizedMessage());
+            logger.error(e.getLocalizedMessage());
             return null;
         }
     }
 
+    private JSONArray updateRows(String col, String condition, String value,
+                                 JSONObject metadata, JSONArray rows, JSONObject assignments) {
+
+        JSONArray newRows = new JSONArray();
+        int counter = 0;
+        ArrayList<String> updateCols = new ArrayList<>(assignments.keySet());
+        String colType = (String) metadata.get(col);
+        for (int i = 0; i < rows.size(); i++) {
+            boolean matched = false;
+            JSONObject curObj = (JSONObject) rows.get(i);
+            if (col == null) {
+                matched = true;
+            } else {
+                if (colType.contains("int")) {
+                    int originalValue = (int) (long) curObj.get(col);
+                    int givenValue = Integer.parseInt(value);
+                    switch (condition) {
+                        case "<":
+                            matched = originalValue < givenValue;
+                            break;
+                        case "<=":
+                            matched = originalValue <= givenValue;
+                            break;
+                        case ">":
+                            matched = originalValue > givenValue;
+                            break;
+                        case ">=":
+                            matched = originalValue >= givenValue;
+                            break;
+                        case "=":
+                            matched = originalValue == givenValue;
+                            break;
+                        case "!=":
+                            matched = originalValue != givenValue;
+                            break;
+                        default:
+                            matched = false;
+                            break;
+                    }
+                } else if (colType.contains("varchar")) {
+                    String originalValue = (String) curObj.get(col);
+                    String givenValue = value;
+                    if (givenValue.startsWith("\"")) givenValue = givenValue.substring(1);
+                    if (givenValue.endsWith("\"")) givenValue = givenValue.substring(0, givenValue.length() - 1);
+                    switch (condition) {
+                        case "=":
+                            matched = originalValue.equals(givenValue);
+                            break;
+                        case "!=":
+                            matched = !originalValue.equals(givenValue);
+                            break;
+                        default:
+                            matched = false;
+                            break;
+                    }
+                }
+            }
+            if (matched) {
+                counter++;
+                for (int j = 0; j < updateCols.size(); j++) {
+                    String currCol = updateCols.get(j);
+                    String currentColType = (String) metadata.get(currCol);
+                    if (currentColType.contains("int")) {
+                        int value1 = Integer.parseInt((String) assignments.get(currCol));
+                        curObj.put(currCol, value1);
+                    } else if (currentColType.contains("varchar")) {
+                        String value1 = (String) assignments.get(currCol);
+                        if (value1.startsWith("\"")) value1 = value1.substring(1);
+                        if (value1.endsWith("\"")) value1 = value1.substring(0, value1.length() - 1);
+                        curObj.put(currCol, value1);
+                    } else if (currentColType.contains("float")) {
+                        float value1 = Float.parseFloat((String) assignments.get(currCol));
+                        curObj.put(currCol, value1);
+                    } else if (currentColType.contains("boolean")) {
+                        boolean value1 = Boolean.parseBoolean((String) assignments.get(currCol));
+                        curObj.put(currCol, value1);
+                    }
+                }
+                newRows.add(curObj);
+            } else {
+                newRows.add(curObj);
+            }
+        }
+        String printQuery = counter + " row(s) updated.";
+        logger.info(printQuery);
+        return newRows;
+    }
 }

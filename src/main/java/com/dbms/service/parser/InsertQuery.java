@@ -1,16 +1,26 @@
 package com.dbms.service.parser;
 
 import com.dbms.models.User;
+import com.dbms.presentation.IConsoleOutput;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.*;
 
 @Component
 public class InsertQuery {
+
+    @Autowired
+    private IConsoleOutput logger;
+
+    @Autowired
+    private Utils utils;
 
     private final String errorMessage = "Invalid insert query. Please check syntax/spacing.";
     private final String tableNameRegex = "(\\w+)";
@@ -66,14 +76,56 @@ public class InsertQuery {
                 System.out.println(errorMessage);
                 return false;
             }
-            System.out.println(parsedQuery);
+
             String dbName = user.getCompleteDatabase().getDbName();
             JSONObject metaData = user.getCompleteDatabase().getMetaData();
-            Map<String, JSONArray> x = user.getCompleteDatabase().getTableRecords();
-            // get data
+            Map<String, JSONArray> tableRecords = user.getCompleteDatabase().getTableRecords();
+            JSONArray tablesMetaData = (JSONArray) metaData.get("tables");
+            JSONArray currentTableRecords = tableRecords.get(tableName);
+            JSONObject currentTableMetadata = null;
+            for (Object curObj : tablesMetaData) {
+                JSONObject tableObj = (JSONObject) curObj;
+                JSONObject metadata = (JSONObject) tableObj.get(tableName);
+                if (metadata != null) {
+                    currentTableMetadata = (JSONObject) metadata.get("columns");
+                    break;
+                }
+            }
+            if (currentTableMetadata == null) {
+                logger.error("Unable to fetch table metadata");
+                return false;
+            }
+
+            ArrayList filteredColumns = new ArrayList();
+
+            if (columns.size() == 0) {
+                Set keys = currentTableMetadata.keySet();
+                for(Object key : keys) {
+                    key = (String) key;
+                    filteredColumns.add(key);
+                }
+            } else {
+                filteredColumns = (ArrayList) columns;
+            }
+
+            if (filteredColumns.size() != values.size()) {
+                logger.error("errorMessage");
+                logger.error(errorMessage);
+                return false;
+            }
+
+            JSONObject newRow = createRow(filteredColumns, values, currentTableMetadata);
+
+            currentTableRecords.add(newRow);
+
+            String fileNameWithDB = user.getUserName() + "_" + dbName + "\\" + tableName + ".json";
+
+            utils.updateTableFile(currentTableRecords.toJSONString(), fileNameWithDB);
+
+            logger.info("1 row inserted.");
             return true;
         } catch (Exception e) {
-            System.out.println(e.getLocalizedMessage());
+            System.out.println(errorMessage);
             return false;
         }
     }
@@ -97,11 +149,12 @@ public class InsertQuery {
         int currIndex = 1; // to avoid open bracket "("
         while(currIndex < columnValues.length()) {
             int endIndex;
-            if (columnValues.charAt(currIndex) == ',') {
+            if (columnValues.charAt(currIndex) == ',' || columnValues.charAt(currIndex) == ')') {
                 currIndex = currIndex + 1;
                 continue;
             } else if (columnValues.charAt(currIndex) == '"') { // strings
                 endIndex = columnValues.indexOf('"', currIndex + 1);
+                currIndex++;
             } else {
                 try {
                     endIndex = currIndex + 1;
@@ -116,10 +169,33 @@ public class InsertQuery {
                 System.out.println(errorMessage);
                 return null;
             }
-            values.add(columnValues.substring(currIndex + 1, endIndex).trim());
+            values.add(columnValues.substring(currIndex, endIndex).trim());
             currIndex = endIndex + 1;
         }
         return values;
     }
 
+    private JSONObject createRow(ArrayList filteredColumns, ArrayList values, JSONObject metaData) {
+        JSONObject newRecord = new JSONObject();
+        for (int i = 0; i < filteredColumns.size(); i++) {
+            String colType = (String) metaData.get(filteredColumns.get(i));
+            if (colType.contains("int")) {
+                int value = Integer.parseInt((String) values.get(i));
+                newRecord.put(filteredColumns.get(i), value);
+            } else if (colType.contains("varchar")) {
+                String value = (String) values.get(i);
+                if (value.startsWith("\"")) value = value.substring(1);
+                if (value.endsWith("\"")) value = value.substring(0, value.length() - 1);
+                newRecord.put(filteredColumns.get(i), value);
+            } else if (colType.contains("float")) {
+                float value = Float.parseFloat((String) values.get(i));
+                newRecord.put(filteredColumns.get(i), value);
+            } else if (colType.contains("boolean")) {
+                boolean value = Boolean.parseBoolean((String) values.get(i));
+                newRecord.put(filteredColumns.get(i), value);
+            }
+        }
+
+        return newRecord;
+    }
 }

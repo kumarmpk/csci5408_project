@@ -22,13 +22,7 @@ public class DBMSLogger {
             consoleHandler.setFormatter(new Formatter() {
                 @Override
                 public String format(LogRecord record) {
-                    DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
-    //                String filePathArr = record.getSourceClassName();
-    //                String fileName = filePathArr.substring(filePathArr.lastIndexOf('.') + 1);
-                    return String.format("[%-15s] [%s] %s\n",
-                            dateFormat.format(new Date(record.getMillis())),
-                            record.getLevel(),
-                            record.getMessage());
+                    return String.format("%s\n", record.getMessage());
                 }
             });
 
@@ -39,8 +33,6 @@ public class DBMSLogger {
                 @Override
                 public String format(LogRecord record) {
                     DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
-//                String filePathArr = record.getSourceClassName();
-//                String fileName = filePathArr.substring(filePathArr.lastIndexOf('.') + 1);
                     return String.format("[%-15s] [%s] %s\n",
                             dateFormat.format(new Date(record.getMillis())),
                             record.getLevel(),

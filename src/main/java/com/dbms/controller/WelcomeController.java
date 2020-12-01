@@ -40,6 +40,13 @@ public class WelcomeController {
         return "login";
     }
 
+    @GetMapping("/logout")
+    public String getLogout(Model model){
+        List<User> userList = AppInfo.getInstance().getUserList();
+        userList.remove(loggedInUser);
+        return "index";
+    }
+
     @PostMapping("/login")
     public String postLogin(@ModelAttribute User user, Model model) {
         try {

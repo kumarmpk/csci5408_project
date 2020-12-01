@@ -1,5 +1,6 @@
 package com.dbms.service;
 
+import com.dbms.datasource.ReadFile;
 import com.dbms.model.CompleteDatabase;
 import com.dbms.model.User;
 import com.dbms.presentation.ConsoleOutput;
@@ -8,6 +9,7 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.Map;
 public class GeneralController {
 
     @Autowired
-    private ConsoleOutput consoleOutput;
+    private ReadFile readFile;
 
     @Autowired
     private CreateLoadDatabase createLoadDatabase;
@@ -35,6 +37,11 @@ public class GeneralController {
             }
         }
         return output;
+    }
+
+    public List<String> showDatabases(User user) throws IOException {
+        List<String> output = new ArrayList<>();
+        return readFile.readAllFolders(user.getUserGroup());
     }
 
     public List<String> descTable(User user, String query){

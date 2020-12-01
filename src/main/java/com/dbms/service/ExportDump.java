@@ -1,7 +1,7 @@
 package com.dbms.service;
 
 import com.dbms.datasource.Resource;
-import com.dbms.models.User;
+import com.dbms.model.User;
 import com.dbms.presentation.ConsoleOutput;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.regex.Matcher;

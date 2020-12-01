@@ -124,8 +124,8 @@ public class UpdateQuery {
             String fileNameWithDB = user.getUserGroup() + "\\"+ dbName + "\\" + tableName + ".json";
 
             utils.updateTableFile(updatedRows.toJSONString(), fileNameWithDB);
-            output.add(String.valueOf(map.get("count")));
-            output.add("Updated successfully.");
+            output.add(String.valueOf(map.get("count")) + "Updated successfully.");
+            output.add("");
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage());
             output.add(e.getMessage());

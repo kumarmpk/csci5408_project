@@ -208,13 +208,13 @@ public class SelectQuery {
 
     private List<String> displayOutput(List filteredRows, List filteredColumns) {
         List<String> output = new ArrayList<>();
-        String separator = new String(new char[(50*filteredColumns.size()) + filteredColumns.size() +1])
+        String separator = new String(new char[(45*filteredColumns.size()) + filteredColumns.size() +1])
                 .replace('\0', '_');
 
         output.add(separator);
         String columns = "";
         for (Object filteredColumn : filteredColumns) {
-            columns = columns + ((String) filteredColumn) +"\t\t\t|\t\t\t";
+            columns = "\t"+columns + ((String) filteredColumn) +"\t\t|\t\t";
         }
         output.add(columns);
         output.add(separator);
@@ -223,7 +223,7 @@ public class SelectQuery {
             JSONObject row = (JSONObject) filteredRow;
             columns = "";
             for (Object filteredColumn : filteredColumns) {
-                columns = columns + row.get(filteredColumn) +"\t\t\t|\t\t\t";
+                columns = columns + row.get(filteredColumn) +"\t\t|\t\t";
             }
             output.add(columns);
             output.add(separator);

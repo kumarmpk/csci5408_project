@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,22 +48,25 @@ public class ReadFile implements IReadFile{
         }
     }
 
-    public JSONObject readJSONObjectFromFile(String filePath) throws IOException, ParseException {
-        JSONParser jsonParser = new JSONParser();
-        try{
-            FileReader reader = new FileReader(filePath);
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
-            return jsonObject;
-        } catch (FileNotFoundException e) {
-            consoleOutput.error("ReadFile: readJSON: File not found. " + e);
-            throw e;
-        } catch (IOException e) {
-            consoleOutput.error("ReadFile: readJSON: File read failed. " + e);
-            throw e;
-        } catch (ParseException e) {
-            consoleOutput.error("ReadFile: readJSON: Imported file is not valid. Please make sure it is JSON format or if all fields are either boolean,string,array,object");
-            throw e;
+    public List<String> readAllFolders(String userGroup) throws IOException {
+        List<String> output = new ArrayList<>();
+        String dirName = resource.dbPath + userGroup;
+        Path directoryPath = Paths.get(dirName);
+        List<Path> filePathList = Files.list(directoryPath).collect(Collectors.toList());
+        if(filePathList != null && !filePathList.isEmpty()) {
+            for (Path path : filePathList) {
+                String pathStr = path.toString();
+                if(Files.isDirectory(path)){
+                    String[] pathArr = pathStr.split("\\\\");
+                    String dbName = pathArr[pathArr.length - 1];
+                    output.add(dbName);
+                }
+            }
         }
+        if(output.size() == 0){
+            output.add("There are no database to show.");
+        }
+        return output;
     }
 
     @Override

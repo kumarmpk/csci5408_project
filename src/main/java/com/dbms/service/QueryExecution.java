@@ -109,21 +109,21 @@ public class QueryExecution {
                     } else if (userResponse.equalsIgnoreCase(generateERD)) {
                         output.add(erdGenerator.generateERD(user.getCompleteDatabase().getDbName()));
                     } else if (queryType.equalsIgnoreCase(exportDump)) {
-                        dumpExporter.exportSQLDump(user, userResponse);
+                        output = dumpExporter.exportSQLDump(user, userResponse);
                     } else {
                         query.setError(true);
                         output.add("Invalid query.");
                     }
-                    if (!query.isError()) {
-                        query.setResultFlag(true);
-                        if (query.getResultList() == null) {
-                            query.setResultList(new ArrayList<>());
-                        }
-                        query.getResultList().addAll(output);
-                    } else {
-                        query.setError(true);
-                        query.setAppResponse(output.get(0));
+                }
+                if (!query.isError()) {
+                    query.setResultFlag(true);
+                    if (query.getResultList() == null) {
+                        query.setResultList(new ArrayList<>());
                     }
+                    query.getResultList().addAll(output);
+                } else {
+                    query.setError(true);
+                    query.setAppResponse(output.get(0));
                 }
             }
         }

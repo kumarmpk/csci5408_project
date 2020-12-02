@@ -14,6 +14,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,11 +30,12 @@ public class ExportDump {
     private String exportRegex = "(?:export)\\s(\\w+);?";
     private String errorMessage = "Invalid export query. Please check syntax/spacing";
 
-    public void exportSQLDump(User user, String exportQuery){
-        executeExport(user, exportQuery);
+    public List<String> exportSQLDump(User user, String exportQuery){
+        return executeExport(user, exportQuery);
     }
 
-    private boolean executeExport(User user, String exportQuery) {
+    private List<String> executeExport(User user, String exportQuery) {
+        List<String> output = new ArrayList<>();
         String accessibleDBName = user.getCompleteDatabase().getDbName();
         Pattern syntaxExp = Pattern.compile(exportRegex, Pattern.CASE_INSENSITIVE);
         Matcher queryParts = syntaxExp.matcher(exportQuery);
@@ -42,32 +44,36 @@ public class ExportDump {
             dbName = queryParts.group(1);
         } else {
             logger.error(errorMessage);
-            return false;
+            output.add(errorMessage);
+            return output;
         }
         if (!accessibleDBName.equals(dbName)) {
             logger.warning("You do not have access to this database.");
-            return false;
+            output.add("You do not have access to this database.");
+            return output;
         }
-        String userName = user.getUserName();
-        String metaDataFilePath = resource.dbPath + userName + "_" + dbName + "\\metadata.json";
+        String metaDataFilePath = resource.dbPath + user.getUserGroup() +"\\" + dbName + "\\metadata.json";
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        String exportFileName = userName + "_" + dbName +
+        String exportFileName = dbName +
                 "_export_" + timestamp.getTime() + ".sql";
         String dumpFilePath = resource.dumpPath + exportFileName; // ex: user1_db_export_1233456.sql
-        String completeDBName = userName + "_" + dbName;
+        String completeDBName = dbName;
         try {
             boolean exported = exportToFile(metaDataFilePath, dumpFilePath, completeDBName);
             if (!exported) {
                 logger.error("Failed to export dump");
-                return false;
+                output.add("Failed to export dump");
+                return output;
             }
             logger.info("File successfully exported as: " + exportFileName);
+            output.add("File successfully exported as: " + exportFileName);
         } catch (Exception e) {
             logger.error("Failed to export dump");
-            return false;
+            output.add("Failed to export dump");
+            return output;
         }
-        return true;
+        return output;
     }
 
     private boolean exportToFile(String metaDataFilePath, String dumpFilePath, String dbName) throws Exception {
@@ -123,7 +129,7 @@ public class ExportDump {
 
                 String primaryKey = (String) tableData.get("primaryKey");
                 if(!primaryKey.isEmpty()) {
-                    dumpWriter.write("PRIMARY KEY (" + primaryKey + "),\n");
+                    dumpWriter.write("PRIMARY KEY (" + primaryKey + ")\n");
                 }
                 dumpWriter.write(");\n\n\n");
             }

@@ -4,6 +4,7 @@ import com.dbms.model.AppInfo;
 import com.dbms.model.Query;
 import com.dbms.model.Transaction;
 import com.dbms.model.User;
+import com.dbms.presentation.IConsoleOutput;
 import com.dbms.service.QueryExecution;
 import com.dbms.service.TransactionController;
 import com.dbms.service.UserAuthentication;
@@ -22,6 +23,9 @@ import java.util.Map;
 
 @Controller
 public class WelcomeController {
+
+    @Autowired
+    private IConsoleOutput logger;
 
     @Autowired
     private UserAuthentication userAuthentication;
@@ -122,6 +126,7 @@ public class WelcomeController {
     @PostMapping("/query")
     public String postQuery(@ModelAttribute Query query, Model model) {
         try {
+            logger.info("user query: "+query.getUserQuery());
             List<User> userList = AppInfo.getInstance().getUserList();
             for(User user : userList){
                 if(user.getUserName().equalsIgnoreCase(loggedInUser.getUserName())){
@@ -145,6 +150,12 @@ public class WelcomeController {
                 query = transactionController(query);
             } else {
                 query = queryExecution.queryConsole(loggedInUser, query);
+            }
+            logger.info("Appresponse: "+query.getAppResponse());
+            if(query.getResultList() != null) {
+                for (String result : query.getResultList()) {
+                    logger.info("result: " + result);
+                }
             }
         } catch (Exception e){
             e.printStackTrace();

@@ -47,6 +47,7 @@ public class WelcomeController {
     @GetMapping("/logout")
     public String getLogout(Model model){
         List<User> userList = AppInfo.getInstance().getUserList();
+        loggedInUser = null;
         userList.remove(loggedInUser);
         return "index";
     }
@@ -89,7 +90,9 @@ public class WelcomeController {
     public String getQuery(
             Model model) {
         Query query = new Query();
-        query.setUserName(loggedInUser.getUserName());
+        if(loggedInUser != null) {
+            query.setUserName(loggedInUser.getUserName());
+        }
         model.addAttribute("query", query);
         return "query";
     }
@@ -127,35 +130,40 @@ public class WelcomeController {
     public String postQuery(@ModelAttribute Query query, Model model) {
         try {
             logger.info("user query: "+query.getUserQuery());
-            List<User> userList = AppInfo.getInstance().getUserList();
-            for(User user : userList){
-                if(user.getUserName().equalsIgnoreCase(loggedInUser.getUserName())){
-                    loggedInUser = user;
-                    break;
+            if(loggedInUser != null) {
+                List<User> userList = AppInfo.getInstance().getUserList();
+                for (User user : userList) {
+                    if (user.getUserName().equalsIgnoreCase(loggedInUser.getUserName())) {
+                        loggedInUser = user;
+                        break;
+                    }
                 }
-            }
-            query.setUserName(loggedInUser.getUserName());
-            model.addAttribute("query", query);
-            if(query.getUserQuery() != null && query.getUserQuery().contains("start transaction")){
-                if(loggedInUser.getCompleteDatabase() != null) {
-                    loggedInUser.setTransactionFlag(true);
-                    query.setResultFlag(true);
-                    query.setResultList(new ArrayList<>());
-                    query.getResultList().add("Transaction started.");
-                } else{
-                    query.setError(true);
-                    query.setAppResponse("Load or create a database to use.");
+                query.setUserName(loggedInUser.getUserName());
+                model.addAttribute("query", query);
+                if (query.getUserQuery() != null && query.getUserQuery().contains("start transaction")) {
+                    if (loggedInUser.getCompleteDatabase() != null) {
+                        loggedInUser.setTransactionFlag(true);
+                        query.setResultFlag(true);
+                        query.setResultList(new ArrayList<>());
+                        query.getResultList().add("Transaction started.");
+                    } else {
+                        query.setError(true);
+                        query.setAppResponse("Load or create a database to use.");
+                    }
+                } else if (loggedInUser.isTransactionFlag()) {
+                    query = transactionController(query);
+                } else {
+                    query = queryExecution.queryConsole(loggedInUser, query);
                 }
-            } else if(loggedInUser.isTransactionFlag()){
-                query = transactionController(query);
-            } else {
-                query = queryExecution.queryConsole(loggedInUser, query);
-            }
-            logger.info("Appresponse: "+query.getAppResponse());
-            if(query.getResultList() != null) {
-                for (String result : query.getResultList()) {
-                    logger.info("result: " + result);
+                logger.info("Appresponse: " + query.getAppResponse());
+                if (query.getResultList() != null) {
+                    for (String result : query.getResultList()) {
+                        logger.info("result: " + result);
+                    }
                 }
+            } else{
+                query.setError(true);
+                query.setAppResponse("No logged in user.");
             }
         } catch (Exception e){
             e.printStackTrace();
@@ -218,13 +226,17 @@ public class WelcomeController {
         } else if (outputMap.get("rollback") != null){
             transaction.getQueryList().clear();
             transaction.getQueryJsonList().clear();
+            query.setResultFlag(true);
+            query.getResultList().add("Transaction rolledback successfully.");
             loggedInUser.setTransactionFlag(false);
         } else if (outputMap.get("invalid") != null){
             query.setError(true);
             query.setAppResponse("Invalid query. Please try again.");
         }
         if(commitFlag){
+            query.setResultFlag(true);
             query.getResultList().addAll(transactionController.commitTransaction(loggedInUser));
+            query.getResultList().add("Transaction committed successfully.");
             transaction.getQueryList().clear();
             transaction.getQueryJsonList().clear();
         }

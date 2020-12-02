@@ -65,6 +65,8 @@ public class ReadFile implements IReadFile{
         }
         if(output.size() == 0){
             output.add("There are no database to show.");
+        } else{
+            output.add(0, "Below are the databases that the logged in user has access to: ");
         }
         return output;
     }

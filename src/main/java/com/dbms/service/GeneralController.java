@@ -40,7 +40,6 @@ public class GeneralController {
     }
 
     public List<String> showDatabases(User user) throws IOException {
-        List<String> output = new ArrayList<>();
         return readFile.readAllFolders(user.getUserGroup());
     }
 

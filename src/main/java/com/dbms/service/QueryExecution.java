@@ -82,7 +82,9 @@ public class QueryExecution {
                 String queryType = words[0];
                 System.out.println("word0=" + words[0]);
 
-                if (queryType.equalsIgnoreCase(use)) {
+                if (userResponse.equalsIgnoreCase(showDatabases)) {
+                    output = generalController.showDatabases(user);
+                } else if (queryType.equalsIgnoreCase(use)) {
                     user = generalController.loadDB(user, userResponse);
                     if (user.getCompleteDatabase() != null) {
                         output.add("Database loaded");
@@ -98,8 +100,6 @@ public class QueryExecution {
                         output.add("Please load a database to show the tables in the database.");
                     } else if (userResponse.equalsIgnoreCase(showTables)) {
                         output = generalController.showTables(user);
-                    }else if (userResponse.equalsIgnoreCase(showDatabases)) {
-                        output = generalController.showDatabases(user);
                     } else if (queryType.equalsIgnoreCase(desc)) {
                         output = generalController.descTable(user, userResponse);
                     } else if (ddlList.contains(queryType)) {

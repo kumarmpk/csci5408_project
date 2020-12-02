@@ -223,15 +223,14 @@ public class SelectQuery {
             JSONObject row = (JSONObject) filteredRow;
             columns = "";
             for (Object filteredColumn : filteredColumns) {
-                columns = columns + row.get(filteredColumn) +"\t\t|\t\t";
+                columns = "\t"+columns + row.get(filteredColumn) +"\t\t|\t\t";
             }
             output.add(columns);
             output.add(separator);
         }
-        output.add( "\n");
         String printQuery = filteredRows.size() + " row(s) returned.";
         logger.info(printQuery);
-        output.add( "\n" + printQuery);
+        output.add(printQuery);
         return output;
     }
 }

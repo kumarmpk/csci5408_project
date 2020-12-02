@@ -139,10 +139,10 @@ public class TransactionController {
                                             return false;
                                         }
                                     }
-                                    JSONArray transColumnNames = (JSONArray) transQueryJson.get("conditionCol");
-                                    JSONArray columnNames = (JSONArray) jsonObject.get("conditionCol");
-                                    JSONArray transColumnValues = (JSONArray) transQueryJson.get("conditionVal");
-                                    JSONArray columnValues = (JSONArray) jsonObject.get("conditionVal");
+                                    String transColumnName = (String) transQueryJson.get("conditionCol");
+                                    String columnName = (String) jsonObject.get("conditionCol");
+                                    String transColumnValue = (String) transQueryJson.get("conditionVal");
+                                    String columnValue = (String) jsonObject.get("conditionVal");
                                     if (tableName.equalsIgnoreCase(transTableName)) {
                                         JSONObject metaDataFile = user.getCompleteDatabase().getMetaData();
                                         JSONArray tablesMetaData = (JSONArray) metaDataFile.get("tables");
@@ -151,18 +151,16 @@ public class TransactionController {
                                             JSONObject tableObj = (JSONObject) curObj;
                                             JSONObject currentTableMetadata = (JSONObject) tableObj.get(tableName);
                                             if (currentTableMetadata != null) {
-                                                primaryKey = (String) currentTableMetadata.get("primayKey");
+                                                primaryKey = (String) currentTableMetadata.get("primaryKey");
                                                 break;
                                             }
                                         }
-                                        for (int i = 0; i < transColumnNames.size(); i++) {
-                                            if (transColumnNames.get(i).equals(columnNames.get(i))
-                                                    && transColumnNames.get(i).equals(primaryKey)) {
-                                                if (transColumnValues.get(i).equals(columnValues.get(i))) {
-                                                    System.out.println("transaction conflict");
-                                                    return false;
-                                                }
-                                            }
+                                        if(columnName.equalsIgnoreCase(primaryKey)
+                                                && columnName.equalsIgnoreCase(transColumnName)
+                                                && columnValue.equals(transColumnValue)){
+
+                                            System.out.println("transaction conflict");
+                                            return false;
                                         }
                                     }
                                 }

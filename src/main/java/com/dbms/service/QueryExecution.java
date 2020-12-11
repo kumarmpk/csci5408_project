@@ -23,7 +23,7 @@ public class QueryExecution {
     private String desc = "desc";
     private String exit = "exit";
     private String use = "use";
-    private String generateERD = "generateERD";
+        private String generateERD = "generateERD";
     private String create = "create";
     private String exportDump = "export";
 
@@ -107,7 +107,7 @@ public class QueryExecution {
                     } else if (dmlList.contains(queryType)) {
                         output.addAll(dmlController.processQuery(user, userResponse));
                     } else if (userResponse.equalsIgnoreCase(generateERD)) {
-                        output.add(erdGenerator.generateERD(user.getCompleteDatabase().getDbName()));
+                        output.add(erdGenerator.generateERD(user.getUserGroup(), user.getCompleteDatabase().getDbName()));
                     } else if (queryType.equalsIgnoreCase(exportDump)) {
                         output = dumpExporter.exportSQLDump(user, userResponse);
                     } else {

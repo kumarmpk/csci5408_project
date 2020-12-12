@@ -3,6 +3,7 @@ package com.dbms.service;
 import com.dbms.model.User;
 import com.dbms.service.parser.CreateDB;
 import com.dbms.service.parser.CreateTable;
+import com.dbms.service.parser.DropQuery;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,9 @@ public class DDLController {
     @Autowired
     private CreateTable createtableQuery;
 
+    @Autowired
+    private DropQuery dropQuery;
+
     public String processQuery(User user, String query) throws IOException {
         String words[] = query.split(" ");
         int queryWordCount = words.length;
@@ -41,8 +45,7 @@ public class DDLController {
 
                     break;
                 case drop:
-
-                    break;
+                    return dropQuery.runQuery(query, user);
                 case truncate:
 
                     break;

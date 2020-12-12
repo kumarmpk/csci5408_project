@@ -54,7 +54,7 @@ public class CreateTable {
 				return executeCreateTableQuery(parsedQuery, user);
 			}
 		}
-		return null;
+		return "Create table failed.";
 	}
 
 	public boolean addTable(User user) throws IOException {
@@ -180,7 +180,7 @@ public class CreateTable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
+			user.getCompleteDatabase().setMetaData(user.getUserGroup());
 			return "Table created.";
 		} catch (Exception e) {
 			System.out.println(e.getLocalizedMessage());

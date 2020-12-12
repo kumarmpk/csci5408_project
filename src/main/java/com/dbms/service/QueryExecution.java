@@ -17,13 +17,11 @@ public class QueryExecution {
 
     private List<String> ddlList;
     private List<String> dmlList;
-    private String startTransaction = "start transaction";
     private String showTables = "show tables";
     private String showDatabases = "show databases";
     private String desc = "desc";
-    private String exit = "exit";
     private String use = "use";
-        private String generateERD = "generateERD";
+    private String generateERD = "generateERD";
     private String create = "create";
     private String exportDump = "export";
 

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,7 @@ public class ExportDump {
             return output;
         }
         String metaDataFilePath = resource.dbPath + user.getUserGroup() +"\\" + dbName + "\\metadata.json";
+        String tableReadPath = resource.dbPath + user.getUserGroup() +"\\" + dbName;
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String exportFileName = dbName +
@@ -60,7 +62,7 @@ public class ExportDump {
         String dumpFilePath = resource.dumpPath + exportFileName; // ex: user1_db_export_1233456.sql
         String completeDBName = dbName;
         try {
-            boolean exported = exportToFile(metaDataFilePath, dumpFilePath, completeDBName);
+            boolean exported = exportToFile(metaDataFilePath, dumpFilePath, completeDBName, tableReadPath);
             if (!exported) {
                 logger.error("Failed to export dump");
                 output.add("Failed to export dump");
@@ -76,15 +78,15 @@ public class ExportDump {
         return output;
     }
 
-    private boolean exportToFile(String metaDataFilePath, String dumpFilePath, String dbName) throws Exception {
+    private boolean exportToFile(String metaDataFilePath, String dumpFilePath, String dbName, String tableReadPath) throws Exception {
         File metaDataFile = new File(metaDataFilePath);
         if (metaDataFile.exists()) {
             FileReader metaDataReader= null;
             try {
-                FileReader reader = new FileReader(metaDataFile);
+                metaDataReader = new FileReader(metaDataFile);
                 JSONParser jsonParser = new JSONParser();
-                JSONObject metaData = (JSONObject) jsonParser.parse(reader);
-                writeContents(dumpFilePath, metaData, dbName);
+                JSONObject metaData = (JSONObject) jsonParser.parse(metaDataReader);
+                writeContents(dumpFilePath, metaData, dbName, tableReadPath);
             } catch (Exception e) {
                 logger.error("Failed to export dump");
             } finally {
@@ -99,7 +101,7 @@ public class ExportDump {
         }
     }
 
-    private void writeContents(String filePath, JSONObject metaData, String dbName) throws Exception {
+    private void writeContents(String filePath, JSONObject metaData, String dbName, String tableReadPath) throws Exception {
         FileWriter dumpWriter = new FileWriter(filePath);
         try {
             JSONArray tablesMetaData = (JSONArray) metaData.get("tables");
@@ -121,17 +123,25 @@ public class ExportDump {
                 dumpWriter.write("\n");
 
                 ArrayList<String> columnHeadings = new ArrayList<>(columns.keySet());
-                for(String heading : columnHeadings) {
+                for(int i = 0; i < columnHeadings.size(); i++) {
+                    String heading = columnHeadings.get(i);
+                    if (i > 0) {
+                        dumpWriter.write(",\n");
+                    }
                     dumpWriter.write("`" + heading + "` ");
                     dumpWriter.write(((String) columns.get(heading)).toUpperCase());
-                    dumpWriter.write(",\n");
                 }
 
                 String primaryKey = (String) tableData.get("primaryKey");
                 if(!primaryKey.isEmpty()) {
-                    dumpWriter.write("PRIMARY KEY (" + primaryKey + ")\n");
+                    dumpWriter.write(",\nPRIMARY KEY (" + primaryKey + ")\n");
                 }
-                dumpWriter.write(");\n\n\n");
+                dumpWriter.write(");\n\n");
+
+                // insert values
+                String insertStatement = getInsertStatement(tableNameArray.get(0), columnHeadings, tableReadPath, columns);
+                dumpWriter.write(insertStatement);
+                dumpWriter.write("\n\n\n");
             }
 
         } catch (Exception e) {
@@ -141,5 +151,55 @@ public class ExportDump {
                 dumpWriter.close();
             }
         }
+    }
+
+    private String getInsertStatement(String tableName, ArrayList<String> columnHeadings,
+                                      String tablesPath, JSONObject columns) throws IOException {
+        String tableFilePath = tablesPath + "\\" + tableName + ".json";
+        String insertStatement = "";
+        File tableFile = new File(tableFilePath);
+        if (tableFile.exists()) {
+            FileReader tableReader= null;
+            try {
+                tableReader = new FileReader(tableFilePath);
+                JSONParser jsonParser = new JSONParser();
+                JSONArray tableData = (JSONArray) jsonParser.parse(tableReader);
+                for (Object jsonRecord : tableData) {
+                    String columnsString = "";
+                    insertStatement  += "INSERT INTO " + tableName + " (" +
+                            columnsString.join(", ", columnHeadings) + ") VALUES (";
+                    JSONObject record = (JSONObject) jsonRecord;
+                    for(int i = 0; i < columnHeadings.size(); i++) {
+                        String columnName = columnHeadings.get(i);
+                        String columnType = (String) columns.get(columnName);
+                        if (i > 0) {
+                            insertStatement += ", ";
+                        }
+                        if (columnType.contains("int")) {
+                            if (record.get(columnName) != null) {
+                                insertStatement += record.get(columnName);
+                            } else {
+                                insertStatement += "null";
+                            }
+                        } else if (columnType.contains("varchar")) {
+                            if (record.get(columnName) != null) {
+                                insertStatement += "\"" + record.get(columnName) + "\"";
+                            } else {
+                                insertStatement += "null";
+                            }
+                        }
+                    }
+                    insertStatement += ");\n";
+                }
+            } catch (Exception e) {
+                logger.error("Failed to export dump");
+                insertStatement = "";
+            } finally {
+                if(tableReader!=null) {
+                    tableReader.close();
+                }
+            }
+        }
+        return insertStatement;
     }
 }

@@ -112,13 +112,13 @@ public class ExportDump {
             for (Object table: tablesMetaData) {
                 JSONObject tableMetaData = (JSONObject) table;
                 ArrayList<String> tableNameArray = new ArrayList<>(tableMetaData.keySet());
-                String dropTableCommand = "DROP TABLE IF EXISTS " + tableNameArray.get(0) + ";";
-                dumpWriter.write(dropTableCommand);
-                dumpWriter.write("\n\n");
+//                String dropTableCommand = "DROP TABLE IF EXISTS " + tableNameArray.get(0) + ";";
+//                dumpWriter.write(dropTableCommand);
+//                dumpWriter.write("\n\n");
 
                 JSONObject tableData = (JSONObject) tableMetaData.get(tableNameArray.get(0));
                 JSONObject columns = (JSONObject) tableData.get("columns");
-                String createTableCommand = "CREATE TABLE " + tableNameArray.get(0) + " (";
+                String createTableCommand = "CREATE TABLE IF NOT EXISTS " + tableNameArray.get(0) + " (";
                 dumpWriter.write(createTableCommand);
                 dumpWriter.write("\n");
 
